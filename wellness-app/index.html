@@ -1,0 +1,923 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>My Wellness</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Wellness">
+<meta name="theme-color" content="#FBFAF6">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap">
+<style>
+/* VOICE: calm, encouraging, never guilt.
+   IDEA: a personal pocket coach: rings and pastel tiles you tap through the day.
+   PICTURE: three progress rings on Today, a body map that fills on Workout.
+   COLOUR and TYPE: warm white, blue water, yellow-green food, lavender training, pink stretching and cycle; Plus Jakarta Sans.
+   LAYOUT: one phone column, floating pill tab bar, bottom sheets for input. */
+:root{color-scheme:light;--bg:#FBFAF6;--ink:#26262B;--soft:#4E4E56;--line:#ECEAE3;--card:#FFFFFF;
+--blue:#D6E5FA;--blueD:#3F6FB8;--blueM:#4F7FCC;--green:#E4ECB4;--greenD:#5E7A1E;--greenM:#9DB53A;
+--lav:#DCD3F7;--lavD:#5B4BA6;--lavM:#A99BE8;--pink:#F8D3E1;--pinkD:#B8436F;--sand:#F3E3C9;--sandD:#9A6A2A;--grey:#E3DFD6}
+*{box-sizing:border-box;min-width:0}
+html,body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 'Plus Jakarta Sans',system-ui,-apple-system,sans-serif;-webkit-tap-highlight-color:transparent;overflow-x:clip}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+button:focus-visible,input:focus-visible{outline:3px solid var(--lavD);outline-offset:2px}
+#app{max-width:520px;margin:0 auto;padding:calc(env(safe-area-inset-top) + 20px) 16px calc(env(safe-area-inset-bottom) + 110px)}
+h1{margin:0;font-size:28px;font-weight:800;letter-spacing:-.02em;line-height:1.1}
+h2{margin:0;font-size:17px;font-weight:800}
+p{margin:0}
+.sub{font-size:14px;font-weight:500;color:#5E5E66}
+.small{font-size:12px;font-weight:600;color:var(--soft)}
+.stack{display:flex;flex-direction:column;gap:14px}
+.row{display:flex;align-items:center;gap:10px}
+.between{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:24px;padding:16px;display:flex;flex-direction:column;gap:10px}
+.tile{border-radius:26px;padding:14px;display:flex;flex-direction:column;gap:10px}
+.chip{align-self:flex-start;font-size:13px;font-weight:700;padding:6px 12px;border-radius:999px;background:#fff}
+.pill{min-height:44px;padding:0 16px;border-radius:999px;border:1.5px solid #CFCDC6;background:#fff;font-size:14px;font-weight:700}
+.btn{min-height:52px;border-radius:999px;border:none;background:var(--ink);color:#fff;font-size:15px;font-weight:800;padding:0 20px}
+.btn.ghost{background:#fff;color:var(--ink);border:1.5px solid #CFCDC6}
+.btn.small{min-height:44px;font-size:14px}
+.round{width:48px;height:48px;border-radius:999px;border:none;display:flex;align-items:center;justify-content:center;flex:none}
+.check{width:30px;height:30px;border-radius:999px;border:2px solid currentColor;display:flex;align-items:center;justify-content:center;flex:none;background:#fff}
+.check.on{background:currentColor}
+.check svg{stroke:#fff}
+.check:not(.on) svg{stroke:transparent}
+.listbtn{display:flex;align-items:center;gap:12px;width:100%;min-height:52px;padding:4px 0;background:none;border:none;border-top:1px solid #F1EFE9;text-align:left}
+.listbtn:first-of-type{border-top:none}
+.t15{font-size:15px;font-weight:700}
+.bar{height:10px;border-radius:999px;background:#F1EFE9;overflow:hidden}
+.bar>i{display:block;height:100%;border-radius:999px}
+.ringwrap{position:relative;flex:none}
+.ringwrap>span{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}
+nav.tabs{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(env(safe-area-inset-bottom) + 14px);width:min(360px,calc(100% - 32px));height:64px;border-radius:999px;background:#fff;border:1px solid var(--line);box-shadow:0 6px 20px rgba(38,38,43,.1);display:grid;grid-template-columns:repeat(5,minmax(0,1fr));align-items:center;padding:0 8px;z-index:20}
+nav.tabs button{height:52px;border:none;background:none;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-size:10.5px;font-weight:700;color:#6B6B73}
+nav.tabs button.on{color:var(--ink)}
+nav.tabs button.on svg{stroke:var(--ink)}
+.sheetbg{position:fixed;inset:0;background:rgba(38,38,43,.45);z-index:30;display:flex;align-items:flex-end;justify-content:center}
+.sheet{background:var(--bg);width:100%;max-width:520px;max-height:90vh;overflow:auto;border-radius:28px 28px 0 0;padding:20px 18px calc(env(safe-area-inset-bottom) + 20px);display:flex;flex-direction:column;gap:14px}
+.seg{display:grid;gap:4px;background:#ECEAE3;border-radius:999px;padding:4px}
+.seg button{min-height:42px;border-radius:999px;border:none;background:transparent;font-size:13px;font-weight:700}
+.seg button.on{background:#fff}
+.choices{display:flex;flex-wrap:wrap;gap:8px}
+.choices button{min-height:44px;min-width:44px;padding:0 14px;border-radius:14px;border:1.5px solid #CFCDC6;background:#fff;font-weight:800}
+.choices button.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+.num{width:100%;min-height:44px;border-radius:14px;border:none;background:#F4F2EC;text-align:center;font-size:16px;font-weight:700}
+.num.done{background:#EDE8FB}
+label.f{display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:700;color:var(--soft)}
+label.f input,label.f textarea{min-height:48px;border-radius:14px;border:1.5px solid #E2DFD7;background:#fff;padding:10px 12px;font-size:16px;font-weight:600;color:var(--ink)}
+.anim{position:relative;border-radius:22px;height:260px;overflow:hidden}
+.anim img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain}
+.wa{animation:wA 2.4s infinite}.wb{animation:wB 2.4s infinite}.wc{animation:wC 2.4s infinite}
+@keyframes wA{0%,30%{opacity:1}36%,94%{opacity:0}100%{opacity:1}}
+@keyframes wB{0%,30%{opacity:0}36%,63%{opacity:1}69%,100%{opacity:0}}
+@keyframes wC{0%,63%{opacity:0}69%,94%{opacity:1}100%{opacity:0}}
+@media (prefers-reduced-motion:reduce){.wa,.wb,.wc{animation:none}.wb,.wc{opacity:0}}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(env(safe-area-inset-bottom) + 92px);background:var(--ink);color:#fff;padding:12px 18px;border-radius:999px;font-size:14px;font-weight:700;z-index:40;max-width:90vw;text-align:center}
+.cal{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:5px}
+.cal div{height:48px;border-radius:12px;padding:4px 5px;display:flex;flex-direction:column;justify-content:space-between;border:2px solid transparent;font-size:12px;font-weight:800}
+.setgrid{display:grid;grid-template-columns:36px minmax(0,1fr) minmax(0,1fr) 48px;gap:8px;align-items:center}
+a{color:var(--ink)}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+</style>
+</head>
+<body>
+<div id="app" aria-live="polite"></div>
+<nav class="tabs" id="tabs" aria-label="Main"></nav>
+<div id="sheet"></div>
+<div id="toast"></div>
+<script>
+{
+/* ---------- constants ---------- */
+const LS = 'wellness.v1';
+const DOW = ['Su','Mo','Tu','We','Th','Fr','Sa'];
+const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+const CHECK = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"/></svg>';
+const ic = d => `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#6B6B73" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${d}</svg>`;
+const ICONS = {
+  today: ic('<rect x="4" y="4" width="7" height="7" rx="2"/><rect x="13" y="4" width="7" height="7" rx="2"/><rect x="4" y="13" width="7" height="7" rx="2"/><rect x="13" y="13" width="7" height="7" rx="2"/>'),
+  workout: ic('<path d="M6 7v10M18 7v10M3 10v4M21 10v4M6 12h12"/>'),
+  routines: ic('<circle cx="12" cy="5" r="2"/><path d="M12 7v6M7 10l5 3 5-3M9 21l3-8 3 8"/>'),
+  progress: ic('<rect x="3" y="3" width="18" height="18" rx="4"/><path d="M8 16v-4M12 16V8M16 16v-6"/>'),
+  more: ic('<circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1L7 17M17 7l2.1-2.1"/>')
+};
+const MEALS = [
+  {id:'breakfast', name:'Breakfast', time:'Morning', protein:17},
+  {id:'lunch', name:'Lunch', time:'11:00', protein:30},
+  {id:'snack', name:'Snack', time:'15:00', protein:18},
+  {id:'dinner', name:'Dinner', time:'18:00', protein:35},
+  {id:'evening', name:'Evening', time:'Planned treat', protein:3}
+];
+const MOODS = [
+  {id:'great', label:'Great', bg:'#E4ECB4', v:5},
+  {id:'calm', label:'Calm', bg:'#D6E5FA', v:4},
+  {id:'tired', label:'Tired', bg:'#DCD3F7', v:2.5},
+  {id:'stressed', label:'Stressed', bg:'#F3E3C9', v:2},
+  {id:'low', label:'Low', bg:'#E3DFD6', v:1}
+];
+const ex = (id, name, slug, sets, reps, top, unit, muscles, cues, avoid, extra) => Object.assign({id, name, slug, sets, reps, top, unit, muscles, cues, avoid}, extra || {});
+const SESSIONS = {
+  LA: {name:'Lower A', exercises:[
+    ex('gsq','Goblet squat to a box','goblet-squat',3,'10–12',12,'kg',['quads','glutes','adductors','core'],['Hold the dumbbell at your chest, elbows pointing down.','Sit back and down until you lightly touch the box.','Knees follow your toes, chest stays proud.','Push through your whole foot to stand up.'],'Dropping onto the box.',{note:'Shown without the box: squat until you lightly touch it.',step:2}),
+    ex('rdl','Dumbbell Romanian deadlift','dumbbell-romanian-deadlift',3,'10–12 · 3 sec down',12,'kg',['hamstrings','glutes','lowerBack'],['Soft knees, push your hips straight back.','Dumbbells slide down your thighs, back flat.','Lower for 3 seconds until you feel your hamstrings.','Squeeze your glutes to stand tall.'],'Rounding your back to reach lower.',{step:2}),
+    ex('ht','Hip thrust','hip-thrust',3,'10–12',12,'kg',['glutes','hamstrings'],['Upper back on the bench, feet flat.','Drive through your heels until your body is flat.','Tuck your chin, squeeze 1 sec at the top.'],'Arching your lower back at the top.',{step:2}),
+    ex('lsd','Lateral step-down, low box','step-down',2,'8–10 per leg',10,'kg',['quads','glutes'],['Stand side-on on a low box.','Slowly lower the free heel to tap the floor.','Standing knee tracks over your toes.'],'Letting the knee cave inwards.',{note:'Shown facing forward. Do yours side-on to the box.',step:1}),
+    ex('bal','Single-leg balance',null,2,'30 sec per leg',30,'sec',['calves','glutes','core'],['Stand tall on one leg, soft knee.','Fix your eyes on one point.','When it gets easy, close your eyes.'],'Locking the standing knee.'),
+    ex('suit','Suitcase carry','farmer-carry',2,'30 m per side',null,'kg',['core','forearms','traps'],['Hold one heavy dumbbell at your side.','Walk tall with level shoulders.','Brace your core.'],'Leaning towards or away from the weight.',{note:'Shown with two weights. Hold just one.',step:2}),
+    ex('agi','Agility finisher','lateral-shuffle',1,'5 min · shuffles, side hops, quick feet',null,'min',['quads','calves','glutes'],['Lateral shuffles, small side hops, quick feet.','Light and springy, stay low.','Stop if your knees complain.'],'Big jumps or landing stiff-legged.',{fromWeek:4,optional:true})
+  ]},
+  UA: {name:'Upper A', exercises:[
+    ex('row','Single-arm dumbbell row','one-arm-dumbbell-row',3,'10–12 per arm',12,'kg',['back','arms'],['Hand and knee on a bench, flat back.','Pull the dumbbell to your hip.','Lower slowly.'],'Twisting your torso to lift.',{step:1}),
+    ex('idp','Incline dumbbell press','incline-dumbbell-press',3,'10–12',12,'kg',['chest','shoulders','arms'],['Bench at a low incline.','Press up and slightly together.','Lower with control to chest level.'],'Flaring your elbows straight out.',{step:1}),
+    ex('yt','Prone incline Y-T raise','prone-y-raise',3,'10 of each',10,'kg',['back','shoulders','traps'],['Lie face down on an incline bench.','Raise light dumbbells into a Y, then a T.','Squeeze your shoulder blades.'],'Shrugging towards your ears.',{note:'Shown as the Y. Add the T with arms out to the side.',step:1}),
+    ex('rf','Dumbbell reverse fly','rear-delt-fly',2,'12–15',15,'kg',['shoulders','back'],['Hinge forward with a flat back.','Open your arms wide, soft elbows.','Lower slowly.'],'Swinging the weights.',{step:1}),
+    ex('fc',"Farmer's carry",'farmer-carry',3,'30–40 m',null,'kg',['forearms','traps','core'],['A heavy dumbbell in each hand.','Walk tall, shoulders down.','Short, steady steps.'],'Letting your shoulders round forward.',{step:2})
+  ]},
+  LB: {name:'Lower B', exercises:[
+    ex('sup','Low step-up','step-up',3,'10 per leg',10,'kg',['quads','glutes'],['Whole foot on a knee-height box or lower.','Push through the heel to stand up.','Step down slowly.'],'Pushing off with the back leg.',{step:1}),
+    ex('dl','Dumbbell or trap-bar deadlift','trap-bar-deadlift',3,'8–10',10,'kg',['glutes','hamstrings','quads','lowerBack'],['Feet hip-width, weight close.','Flat back, push the floor away.','Stand tall, lower with control.'],'Rounding your back.',{step:2.5}),
+    ex('gb','Glute bridge, dumbbell on hips','dumbbell-glute-bridge',3,'12',12,'kg',['glutes','hamstrings'],['On your back, feet flat.','Drive hips up and squeeze.','Lower slowly.'],'Pushing through your toes.',{untilWeek:2,step:2}),
+    ex('slr','Single-leg Romanian deadlift','single-leg-romanian-deadlift',2,'8 per leg',8,'kg',['hamstrings','glutes','core'],['Soft standing knee.','Hinge forward as the back leg rises.','Hips stay square to the floor.'],'Twisting your hips open.',{fromWeek:3,step:1}),
+    ex('calf','Standing calf raise','calf-raise',3,'12–15',15,'kg',['calves'],['Rise high onto your toes.','Pause at the top.','Lower slowly.'],'Bouncing at the bottom.',{step:2}),
+    ex('wall','Wall sit','wall-sit',3,'',null,'sec',['quads','glutes','adductors'],['Back flat on the wall.','Slide down to a comfortable bend.','Breathe and hold.'],'Going lower than your knees like.',{wall:true}),
+    ex('sp','Side plank','side-plank',2,'20–30 sec per side',30,'sec',['core'],['Elbow under shoulder.','Hips high, body in a line.','Breathe steadily.'],'Letting your hips sag.'),
+    ex('agi2','Agility finisher','lateral-shuffle',1,'5 min · shuffles, side hops, quick feet',null,'min',['quads','calves','glutes'],['Lateral shuffles, small side hops, quick feet.','Light and springy, stay low.','Stop if your knees complain.'],'Big jumps or landing stiff-legged.',{fromWeek:4,optional:true})
+  ]},
+  UB: {name:'Upper B', exercises:[
+    ex('csr','Chest-supported dumbbell row','chest-supported-row',3,'10–12',12,'kg',['back','arms'],['Chest on an incline bench.','Pull both dumbbells to your ribs.','Lower slowly.'],'Lifting your chest off the bench.',{step:1}),
+    ex('pu','Push-up (incline if needed)','incline-push-up',3,'as many good reps as you can',null,'reps',['chest','arms','core'],['Hands on a bench or the floor.','Body in one straight line.','Lower your chest, push away.'],'Letting your hips sag.'),
+    ex('npu','Negative pull-up (or dumbbell pullover)','negative-pull-up',3,'3–5 slow',5,'reps',['back','arms'],['Jump or step to the top.','Lower yourself over 3–5 seconds.','Step down and reset.'],'Dropping fast.'),
+    ex('wc','Dumbbell woodchop','cable-woodchop',2,'10 per side',10,'kg',['core','shoulders'],['Hold one dumbbell with both hands.','Rotate from high on one side to low on the other.','Turn through hips and torso.'],'Twisting only with your arms.',{note:'Shown with a cable. Use a dumbbell.',step:1}),
+    ex('lr','Light lateral raise','lateral-raise',2,'12–15',15,'kg',['shoulders'],['Light dumbbells, soft elbows.','Raise to shoulder height.','Lower slowly.'],'Shrugging or swinging.',{step:1})
+  ]}
+};
+const SESSION_ORDER = ['LA','UA','LB','UB'];
+const SPLIT = [
+  {id:'hip', name:'Half-kneeling hip flexor', dose:'2 × 45 sec per side'},
+  {id:'half', name:'Half-split, contract-relax', dose:'3 rounds per side'},
+  {id:'lizard', name:'Lizard lunge', dose:'45 sec per side'},
+  {id:'split', name:'Supported front split', dose:'2 × 30–60 sec per side · max 4/10'}
+];
+const ROUTINES = {
+  morning:{label:'Morning', meta:'10 min', moves:[
+    ['Cat-cow','10 slow reps',60,'cat-cow-stretch','On hands and knees, round your back up, then let it sag while lifting your chest.'],
+    ['Thread the needle','5 per side',60,null,'On hands and knees, slide one arm under your body, then open it up to the ceiling.'],
+    ['Low lunge with rotation','5 per side',75,null,'Back knee down, hands inside the front foot, rotate and reach one arm up.'],
+    ['90/90 hip switches','8 per side',60,null,'Sit with both knees bent at 90°, rotate both knees side to side.'],
+    ['Neck turns & tilts','5 each direction',60,null,'Slowly look over each shoulder, then tilt ear towards shoulder.'],
+    ['Wall angels','10 reps',60,null,'Back against a wall, slide your arms up and down like a snow angel.'],
+    ['Slow chair squat','10 reps',60,null,'Sit down to a chair and stand up, slow and controlled.'],
+    ['Hamstring sweeps','8 per leg',60,'hamstring-stretch','Heel forward, leg straight, hinge and sweep your hands towards your foot.']]},
+  after:{label:'After work', meta:'7 min', moves:[
+    ['Chin tucks','10 × 3 sec',45,null,'Gently pull your chin straight back into a double chin and hold.'],
+    ['Doorway chest stretch','30 sec per side',60,'doorway-chest-stretch','Forearm on a door frame, step through until your chest opens.'],
+    ['Upper trap stretch','30 sec per side',60,null,'Tilt ear to shoulder, the other hand lightly assisting.'],
+    ['Levator stretch','30 sec per side',60,null,'Turn your nose towards your armpit, then gently look down.'],
+    ['Thoracic extension','10 reps',45,null,'Upper back over the end of a bench, arms crossed, lean back gently.'],
+    ['Scapular wall slides','10 reps',45,null,'Forearms on the wall, slide up while drawing your shoulder blades down.'],
+    ['Half-kneeling hip flexor','30 sec per side',60,'kneeling-hip-flexor-stretch','One knee down, squeeze that glute, shift forward gently.']]},
+  evening:{label:'Evening', meta:'12 min', moves:[
+    ["Child's pose",'1 min · in 4, out 6',60,'childs-pose','Knees wide, sink your hips back and breathe slowly.'],
+    ['Figure-4 stretch','45 sec per side',90,null,'On your back, ankle over the opposite knee, pull both legs towards you.'],
+    ['Hamstring contract-relax','3 rounds per leg',150,'hamstring-stretch','Stretch 20 sec, press your heel into the towel 5 sec, relax deeper 20 sec.'],
+    ['Kneeling half-split','45 sec per side',90,null,'Back knee down, front leg straight, hinge forward with a long back.'],
+    ['Side-lying quad stretch','45 sec per side',90,'standing-quad-stretch','Hold your top ankle and pull the heel gently back. Skip it if your knee complains.'],
+    ['Supine twist','45 sec per side',90,'torso-twist-stretch','On your back, drop both knees to one side, arms out wide.'],
+    ['Open book','5 per side',60,null,'Lying on your side, knees bent, open your top arm across to the other side.'],
+    ['Legs up the wall','2–3 min',150,null,'Legs resting up a wall, eyes closed, slow breathing.']]},
+  split:{label:'Split', meta:'12 min', moves:[
+    ['Half-kneeling hip flexor','2 × 45 sec per side',180,'kneeling-hip-flexor-stretch','Pad under the back knee, squeeze that glute, shift forward.'],
+    ['Half-split, contract-relax','3 rounds per side',300,'hamstring-stretch','Kneeling: stretch 20 sec, press the heel down 5 sec, relax deeper 20 sec.'],
+    ['Lizard lunge','45 sec per side',90,null,'Deep lunge, both hands inside your front foot, back knee down.'],
+    ['Supported front split','2 × 30–60 sec per side',240,null,'Blocks or books under your hands, cushion under your hips. Max 4 out of 10.']]}
+};
+const DEFAULT_SETTINGS = {kcal:2000, protein:100, waterOverride:null, stepsOverride:null, bedOverride:null, gym:['Mo','Tu','Th','Fr'], glass:250, bottle:750, startWeight:null, prefs:{cycle:true, pms:true, minimum:true, weight:true}};
+
+/* ---------- date helpers ---------- */
+const pad = n => (n < 10 ? '0' : '') + n;
+const ymd = d => d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate());
+const parse = s => { const [y, m, d] = s.split('-').map(Number); return new Date(y, m - 1, d); };
+const addDays = (s, n) => { const d = parse(s); d.setDate(d.getDate() + n); return ymd(d); };
+const diffDays = (a, b) => Math.round((parse(b) - parse(a)) / 864e5);
+const todayStr = () => ymd(new Date());
+const G = () => S.settings.goals || {};
+const startD = () => G().start || todayStr();
+const short = s => { const d = parse(s); return d.getDate() + ' ' + MONTHS[d.getMonth()].slice(0, 3); };
+const endD = () => { const ds = [G().date1, G().date2, G().split, G().trip].filter(Boolean).sort(); const last = ds.length ? ds[ds.length - 1] : addDays(startD(), 180); return diffDays(startD(), last) < 60 ? addDays(startD(), 90) : last; };
+const startWeight = () => { if (G().weight0) return Number(G().weight0); if (S.settings.startWeight) return Number(S.settings.startWeight); const k = Object.keys(S.days).sort().find(x => S.days[x].am && S.days[x].am.weight); return k ? Number(S.days[k].am.weight) : null; };
+const weekOf = s => Math.max(1, Math.floor(diffDays(startD(), s) / 7) + 1);
+const mondayOf = s => { const d = parse(s); const k = (d.getDay() + 6) % 7; d.setDate(d.getDate() - k); return ymd(d); };
+const nice = s => { const d = parse(s); return ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'][d.getDay()] + ' ' + d.getDate() + ' ' + MONTHS[d.getMonth()]; };
+const esc = v => String(v == null ? '' : v).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const fmtL = ml => (Math.round(ml / 50) * 50 / 1000).toFixed(2).replace(/0$/, '').replace(/\.0$/, '') + ' L';
+
+/* ---------- state ---------- */
+let S;
+function freshState() { return {settings: JSON.parse(JSON.stringify(DEFAULT_SETTINGS)), days:{}, meas:[], cycle:{starts:[]}, updated:{}}; }
+function load() {
+  try { const raw = localStorage.getItem(LS); if (raw) { const s = JSON.parse(raw); s.settings = Object.assign(JSON.parse(JSON.stringify(DEFAULT_SETTINGS)), s.settings || {}); s.settings.prefs = Object.assign({}, DEFAULT_SETTINGS.prefs, s.settings.prefs || {}); return Object.assign(freshState(), s, {settings: s.settings}); } } catch (e) {}
+  return freshState();
+}
+S = load();
+const dirty = new Set();
+function persistLocal() { try { localStorage.setItem(LS, JSON.stringify(S)); } catch (e) {} }
+function touch(key) { S.updated[key] = Date.now(); dirty.add(key); persistLocal(); scheduleSync(); }
+function day(s) {
+  if (!S.days[s]) S.days[s] = {water:[], meals:{}, routines:{}, steps:0, am:{}, pm:{}, habits:{}, workout:null};
+  const d = S.days[s];
+  d.meals = d.meals || {}; d.routines = d.routines || {}; d.am = d.am || {}; d.pm = d.pm || {}; d.habits = d.habits || {}; d.water = d.water || [];
+  return d;
+}
+function saveDay(s) { touch('d-' + s); }
+function saveMeta() { touch('meta'); }
+
+/* ---------- plan logic ---------- */
+function isGymDay(s) { const k = DOW[parse(s).getDay()]; const g = S.settings.gym; if (!g.includes(k)) return false; if (weekOf(s) <= 2) { const order = ['Mo','Tu','We','Th','Fr','Sa','Su'].filter(x => g.includes(x)); return order.indexOf(k) < 3; } return true; }
+function sessionFor(s) { const k = DOW[parse(s).getDay()]; const order = ['Mo','Tu','We','Th','Fr','Sa','Su'].filter(x => S.settings.gym.includes(x)); const i = order.indexOf(k); return i < 0 ? null : SESSION_ORDER[i % 4]; }
+function lighterWeek(s) { const w = weekOf(s); const trip = G().trip ? weekOf(addDays(G().trip, -6)) : -1; return w === trip || (w % 6 === 0); }
+function cycleDay(s) { const st = (S.cycle.starts || []).filter(x => x <= s).sort(); if (!st.length) return null; const n = diffDays(st[st.length - 1], s) + 1; return n > 45 ? null : n; }
+function phase(cd) { if (!cd) return null; if (cd <= 5) return {name:'Period', key:'period'}; if (cd <= 13) return {name:'Follicular', key:'foll'}; if (cd <= 21) return {name:'Mid-cycle', key:'mid'}; return {name:'Premenstrual', key:'pms'}; }
+function waterGoal(s) { if (S.settings.waterOverride) return S.settings.waterOverride; const w = weekOf(s); if (w <= 2) return 1500; if (w <= 4) return 2000; return isGymDay(s) ? 2500 : 2000; }
+function stepsGoal(s) { if (S.settings.stepsOverride) return S.settings.stepsOverride; const w = weekOf(s); return w <= 2 ? 6000 : w <= 4 ? 7000 : 8000; }
+function bedTime(s) { if (S.settings.bedOverride) return S.settings.bedOverride; const w = weekOf(s); return w <= 2 ? '00:30' : w <= 4 ? '00:00' : '23:30'; }
+function kcalGoal(s) { const p = phase(cycleDay(s)); return S.settings.kcal + (S.settings.prefs.pms && p && p.key === 'pms' ? 200 : 0); }
+function walkGoal(s) { const w = weekOf(s); return [10,10,15,20,20,25,25,30][Math.min(w, 8) - 1]; }
+function wallGoal(s) { return Math.min(60, 30 + 10 * (weekOf(s) - 1)); }
+function exercisesFor(code, s) { const w = weekOf(s); return SESSIONS[code].exercises.filter(e => (!e.fromWeek || w >= e.fromWeek) && (!e.untilWeek || w <= e.untilWeek)); }
+function setsFor(e, s) { return (lighterWeek(s) && e.sets > 2) ? 2 : e.sets; }
+function waterTotal(d) { return d.water.reduce((a, b) => a + b.ml, 0); }
+function waterBy(d, hhmm) { return d.water.filter(w => w.t <= hhmm).reduce((a, b) => a + b.ml, 0); }
+function protein(d) { return MEALS.reduce((a, m) => a + ((d.meals[m.id] && d.meals[m.id].status !== 'skip') ? (d.meals[m.id].protein || 0) : 0), 0); }
+function workoutSets(d) { const w = d.workout; if (!w || !w.sets) return 0; return Object.values(w.sets).filter(x => x.done).length; }
+function workoutDone(d) { return !!(d.workout && (d.workout.finished || workoutSets(d) > 0)); }
+function lastFor(exId, before) {
+  const keys = Object.keys(S.days).filter(k => k < before).sort().reverse();
+  for (const k of keys) { const w = S.days[k].workout; if (!w || !w.sets) continue; const rows = Object.entries(w.sets).filter(([key, v]) => key.split(':')[0] === exId && v.done).map(([key, v]) => v); if (rows.length) return {date:k, rows}; }
+  return null;
+}
+function tasks(s) {
+  const d = day(s); const t = [];
+  t.push(['Morning check-in', d.am.done]);
+  t.push(['Water goal', waterTotal(d) >= waterGoal(s)]);
+  t.push(['Protein goal', protein(d) >= S.settings.protein]);
+  ['breakfast','lunch','snack','dinner'].forEach(m => t.push([m, !!(d.meals[m] && d.meals[m].status)]));
+  if (isGymDay(s)) t.push(['Workout', workoutDone(d)]);
+  t.push(['Morning stretch', !!d.routines.morning]);
+  t.push(['After-work stretch', !!d.routines.after]);
+  t.push(['Evening stretch', !!d.routines.evening]);
+  t.push(['Steps', (d.steps || 0) >= stepsGoal(s)]);
+  t.push(['Evening check-in', d.pm.done]);
+  return t;
+}
+function score(s) { const t = tasks(s); const n = t.filter(x => x[1]).length; return {n, total:t.length, pct:n / t.length}; }
+
+/* ---------- ui helpers ---------- */
+let tab = 'today', viewDate = todayStr(), tutorial = null;
+const app = document.getElementById('app');
+function ring(size, r, sw, parts, center) {
+  const c = 2 * Math.PI;
+  const circles = parts.map((p, i) => { const R = r - i * (sw + 6); const L = c * R; return `<circle cx="${size/2}" cy="${size/2}" r="${R}" fill="none" stroke="${p.track || '#EEECE6'}" stroke-width="${sw}"/><circle cx="${size/2}" cy="${size/2}" r="${R}" fill="none" stroke="${p.color}" stroke-width="${sw}" stroke-linecap="round" stroke-dasharray="${(L * Math.max(0, Math.min(1, p.pct))).toFixed(1)} ${L.toFixed(1)}" transform="rotate(-90 ${size/2} ${size/2})"/>`; }).join('');
+  return `<div class="ringwrap" style="width:${size}px;height:${size}px"><svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" aria-hidden="true">${circles}</svg><span>${center}</span></div>`;
+}
+const bar = (pct, color, track) => `<div class="bar" style="${track ? 'background:' + track : ''}"><i style="width:${Math.round(Math.max(0, Math.min(1, pct)) * 100)}%;background:${color}"></i></div>`;
+const chk = (on, color) => `<span class="check ${on ? 'on' : ''}" style="color:${color}">${CHECK}</span>`;
+function toast(msg) { const t = document.getElementById('toast'); t.innerHTML = `<div class="toast" role="status">${esc(msg)}</div>`; clearTimeout(toast.t); toast.t = setTimeout(() => t.innerHTML = '', 2600); }
+function frames(slug, bg, h) { return slug ? `<div class="anim" style="background:${bg};height:${h || 260}px"><img class="wa" src="frames/${slug}/frame-1.svg" alt=""><img class="wb" src="frames/${slug}/frame-2.svg" alt=""><img class="wc" src="frames/${slug}/frame-3.svg" alt=""></div>` : ''; }
+function openSheet(html) { document.getElementById('sheet').innerHTML = `<div class="sheetbg" data-act="closeSheetBg"><div class="sheet" role="dialog" aria-modal="true">${html}</div></div>`; }
+function closeSheet() { document.getElementById('sheet').innerHTML = ''; tutorial = null; }
+
+/* ---------- TODAY ---------- */
+function renderToday() {
+  const s = viewDate, d = day(s), sc = score(s), cd = cycleDay(s), ph = phase(cd);
+  const wt = waterTotal(d), wg = waterGoal(s), pr = protein(d), gym = isGymDay(s), code = sessionFor(s);
+  const isToday = s === todayStr();
+  const week = weekOf(s), dayN = diffDays(startD(), s) + 1;
+  const msg = sc.n === 0 ? 'Showing up is the whole goal today.' : wt >= wg ? 'Water goal done. That counts.' : sc.pct >= 0.75 ? 'Strong day. Keep it gentle from here.' : sc.pct >= 0.4 ? 'Good going. One small thing at a time.' : 'Every tick counts, minimum versions too.';
+  const cycleChip = S.settings.prefs.cycle ? `<button class="chip" data-act="cycleSheet" style="background:var(--pink);border:none;min-height:32px">${cd ? 'Cycle day ' + cd + ' · ' + ph.name : 'Cycle · log'}</button>` : '';
+  const meals = MEALS.map(m => { const v = d.meals[m.id]; const st = v && v.status; return `<button class="listbtn" style="border-top:none;min-height:48px" data-act="mealSheet" data-arg="${m.id}"><span style="flex:1;display:flex;flex-direction:column"><span class="t15" style="font-size:14px">${m.name}</span><span class="small" style="color:#4A5226">${st === 'on' ? 'On plan · ' + v.protein + ' g' : st === 'off' ? 'Off plan · ' + v.protein + ' g' : st === 'skip' ? 'Skipped' : m.time}</span></span><span class="round" style="width:40px;height:40px;background:${st === 'on' ? 'var(--greenD)' : st === 'off' ? '#C9822F' : st === 'skip' ? '#CFCDC6' : '#C7D77C'}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="${st ? '#fff' : '#26262B'}" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="${st ? 'M5 12l5 5L20 7' : 'M12 5v14M5 12h14'}"/></svg></span></button>`; }).join('');
+  const rout = [['morning','Morning'],['after','After work'],['evening','Evening']].map(([k, l]) => `<button class="listbtn" style="border-top:none;min-height:44px" data-act="toggleRoutine" data-arg="${k}">${chk(d.routines[k], 'var(--pinkD)')}<span class="t15" style="font-size:14px">${l}</span></button>`).join('');
+  const pct = Math.min(1, wt / wg);
+  app.innerHTML = `<div class="stack">
+  <header class="between" style="align-items:flex-end">
+    <div><p class="sub">${isToday ? 'Today' : 'Looking back'}</p><h1>${nice(s)}</h1></div>
+    <div class="row" style="gap:6px"><button class="round" style="width:44px;height:44px;border:1.5px solid #CFCDC6;background:#fff" data-act="shiftDay" data-arg="-1" aria-label="Previous day"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#26262B" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg></button><button class="round" style="width:44px;height:44px;border:1.5px solid #CFCDC6;background:#fff;${isToday ? 'opacity:.35' : ''}" data-act="shiftDay" data-arg="1" aria-label="Next day" ${isToday ? 'disabled' : ''}><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#26262B" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></button></div>
+  </header>
+  <section class="card" style="border-radius:28px;align-items:center;padding:20px 16px 16px" aria-label="Today's progress">
+    <div class="between" style="align-self:stretch"><span class="chip" style="background:#F2F0EA">${dayN >= 1 ? 'Week ' + week + ' · Day ' + dayN : 'Before day 1'}</span>${cycleChip}</div>
+    ${ring(220, 96, 18, [{pct:sc.pct, color:'#5B4BA6'}, {pct:wt / wg, color:'#4F7FCC'}, {pct:pr / S.settings.protein, color:'#9DB53A'}], `<b style="font-size:28px;font-weight:800">${Math.round(sc.pct * 100)}%</b><span class="small">today</span>`)}
+    <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;align-self:stretch;text-align:center">
+      ${[['#5B4BA6','Score', sc.n + ' / ' + sc.total],['#4F7FCC','Water', fmtL(wt)],['#9DB53A','Protein', pr + ' g']].map(([c, l, v]) => `<div><span class="small" style="display:inline-flex;align-items:center;gap:6px"><i style="width:10px;height:10px;border-radius:9px;background:${c};display:inline-block"></i>${l}</span><div style="font-size:18px;font-weight:800">${v}</div></div>`).join('')}
+    </div>
+    <p style="font-size:14px;color:var(--soft);text-align:center">${msg}</p>
+    ${ph && ph.key === 'pms' && S.settings.prefs.pms ? `<p class="small" style="background:var(--pink);padding:8px 12px;border-radius:14px;color:#6E2443;text-align:center">Hold-steady week: about ${kcalGoal(s).toLocaleString('en-US')} kcal, lighter sets count as full wins.</p>` : ''}
+  </section>
+  <div class="grid2">
+    <div class="stack" style="gap:12px">
+      <section class="tile" style="background:var(--blue)" aria-label="Water">
+        <span class="chip">Water</span>
+        <div class="row" style="align-items:flex-end;gap:12px">
+          <div style="display:flex;flex-direction:column;align-items:center"><div style="width:22px;height:12px;border-radius:4px 4px 0 0;background:#3F6FB8"></div><div style="position:relative;width:52px;height:118px;border-radius:18px;background:#EEF4FD;overflow:hidden"><div style="position:absolute;left:0;right:0;bottom:0;height:${Math.round(pct * 100)}%;background:#7FA6E0"></div></div></div>
+          <div><div style="font-size:21px;font-weight:800">${fmtL(wt)}</div><div class="small" style="color:#3E4A5C">of ${fmtL(wg)}</div></div>
+        </div>
+        <div class="row" style="gap:6px;justify-content:flex-end;flex-wrap:wrap">
+          <button class="pill" style="border:none;min-height:44px;padding:0 10px;font-size:13px" data-act="water" data-arg="${S.settings.glass}" aria-label="Add a glass">+${S.settings.glass}</button>
+          <button class="round" style="background:#3F6FB8;width:44px;height:44px" data-act="water" data-arg="${S.settings.bottle}" aria-label="Add a bottle, ${S.settings.bottle} ml"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></button>
+        </div>
+        ${d.water.length ? `<button style="align-self:flex-start;background:none;border:none;padding:0;min-height:32px;font-size:12px;font-weight:700;text-decoration:underline;color:#3E4A5C" data-act="waterUndo">Undo last</button>` : ''}
+      </section>
+      <section class="tile" style="background:var(--pink)" aria-label="Stretching">
+        <span class="chip">Stretching</span>${rout}
+        <button style="align-self:flex-start;background:none;border:none;padding:0;min-height:32px;font-size:12px;font-weight:700;text-decoration:underline;color:#6E2443" data-act="tab" data-arg="routines">Open routines</button>
+      </section>
+    </div>
+    <div class="stack" style="gap:12px">
+      <section class="tile" style="background:var(--green);gap:4px" aria-label="Meals">
+        <div class="between"><span class="chip">Meals</span><b style="font-size:13px">${pr} g</b></div>
+        <span class="small" style="color:#4A5226">protein of ${S.settings.protein} g</span>${meals}
+      </section>
+      <section class="tile" style="background:var(--lav)" aria-label="Workout">
+        <span class="chip">${gym ? 'Workout' : 'Rest day'}</span>
+        <p style="font-size:18px;font-weight:800">${gym ? SESSIONS[code].name : 'Recover'}</p>
+        <p class="small" style="color:#463E66">${gym ? (workoutDone(d) ? workoutSets(d) + ' sets logged' : (lighterWeek(s) ? 'Lighter week · ' : '') + 'about 45–60 min') : 'Walk + stretching only'}</p>
+        <button class="btn small" style="background:#5B4BA6" data-act="tab" data-arg="workout">${gym ? (workoutDone(d) ? 'Continue' : 'Start') : 'See sessions'}</button>
+      </section>
+    </div>
+  </div>
+  <div class="grid2">
+    <section class="card" aria-label="Steps" style="gap:6px">
+      <span class="small" style="font-size:13px">Steps</span>
+      <span style="font-size:22px;font-weight:800">${(d.steps || 0).toLocaleString('en-US')}</span>
+      ${bar((d.steps || 0) / stepsGoal(s), '#C9822F', '#F2EEE6')}
+      <span class="small">of ${stepsGoal(s).toLocaleString('en-US')}</span>
+      <button class="pill" style="min-height:40px" data-act="stepsSheet">Update</button>
+    </section>
+    <section class="card" aria-label="Check-ins" style="gap:8px">
+      <span class="small" style="font-size:13px">Check-ins</span>
+      <button class="listbtn" style="border-top:none;min-height:44px" data-act="amSheet">${chk(d.am.done, 'var(--lavD)')}<span style="display:flex;flex-direction:column"><span class="t15" style="font-size:14px">Morning</span><span class="small">${d.am.done ? (d.am.sleepH ? d.am.sleepH + ' h sleep' : 'Done') + (d.am.weight ? ' · ' + d.am.weight + ' kg' : '') : 'Sleep, weight'}</span></span></button>
+      <button class="listbtn" style="min-height:44px" data-act="pmSheet">${chk(d.pm.done, 'var(--lavD)')}<span style="display:flex;flex-direction:column"><span class="t15" style="font-size:14px">Evening</span><span class="small">${d.pm.done ? 'Energy ' + d.pm.energy + ' · ' + (MOODS.find(m => m.id === d.pm.mood) || {label:''}).label : 'Energy, mood, stress'}</span></span></button>
+    </section>
+  </div>
+  <section class="card" aria-label="Evening habits" style="gap:4px">
+    <div class="between"><h2>Wind-down</h2><span class="small">Lights out ${bedTime(s)}</span></div>
+    <button class="listbtn" style="border-top:none" data-act="habit" data-arg="windDown">${chk(d.habits.windDown, 'var(--lavD)')}<span class="t15">Lights out on time</span></button>
+    <button class="listbtn" data-act="habit" data-arg="phoneAway">${chk(d.habits.phoneAway, 'var(--lavD)')}<span class="t15">Phone on the charger, away from bed</span></button>
+  </section>
+  </div>`;
+}
+
+/* ---------- sheets for Today ---------- */
+function mealSheet(id) {
+  const m = MEALS.find(x => x.id === id), d = day(viewDate), v = d.meals[id] || {status:null, protein:m.protein};
+  openSheet(`<div class="between"><h2 style="font-size:20px">${m.name}</h2><button class="round" style="width:44px;height:44px;background:#ECEAE3" data-act="closeSheet" aria-label="Close"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#26262B" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+  <div class="seg" style="grid-template-columns:repeat(3,1fr)">${[['on','On plan'],['off','Off plan'],['skip','Skipped']].map(([k, l]) => `<button class="${v.status === k ? 'on' : ''}" data-act="mealStatus" data-arg="${id}|${k}">${l}</button>`).join('')}</div>
+  <div class="between"><span class="t15">Protein</span><div class="row"><button class="round" style="background:#fff;border:1.5px solid #E2DFD7" data-act="mealProt" data-arg="${id}|-5" aria-label="Less protein">−</button><b style="min-width:60px;text-align:center;font-size:18px">${v.protein} g</b><button class="round" style="background:#fff;border:1.5px solid #E2DFD7" data-act="mealProt" data-arg="${id}|5" aria-label="More protein">+</button></div></div>
+  <p class="small">Off plan is fine. Logging it honestly is what helps us spot patterns.</p>
+  <button class="btn" data-act="closeSheet">Done</button>`);
+}
+function scale(name, field, val, max, min) { min = min || 1; let h = ''; for (let i = min; i <= max; i++) h += `<button class="${val === i ? 'on' : ''}" data-act="${name}" data-arg="${field}|${i}">${i}</button>`; return `<div class="choices">${h}</div>`; }
+function amSheet() {
+  const d = day(viewDate);
+  openSheet(`<div class="between"><h2 style="font-size:20px">Morning check-in</h2><button class="round" style="width:44px;height:44px;background:#ECEAE3" data-act="closeSheet" aria-label="Close"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#26262B" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+  <label class="f">Hours slept<input type="number" inputmode="decimal" step="0.25" min="0" max="14" data-field="am.sleepH" value="${esc(d.am.sleepH || '')}" placeholder="e.g. 7"></label>
+  <div><p class="small" style="margin-bottom:6px">Sleep quality</p>${scale('amSet', 'sleepQ', d.am.sleepQ, 5)}</div>
+  ${S.settings.prefs.weight ? `<label class="f">Weight (kg, optional)<input type="number" inputmode="decimal" step="0.1" data-field="am.weight" value="${esc(d.am.weight || '')}" placeholder="e.g. 88.6"></label><p class="small">We use the weekly average, so daily ups and downs don't matter.</p>` : ''}
+  <button class="btn" data-act="amDone">Save</button>`);
+}
+function pmSheet() {
+  const d = day(viewDate);
+  openSheet(`<div class="between"><h2 style="font-size:20px">Evening check-in</h2><button class="round" style="width:44px;height:44px;background:#ECEAE3" data-act="closeSheet" aria-label="Close"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#26262B" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+  <div><p class="small" style="margin-bottom:6px">Energy today</p>${scale('pmSet', 'energy', d.pm.energy, 5)}</div>
+  <div><p class="small" style="margin-bottom:6px">Mood</p><div class="choices">${MOODS.map(m => `<button class="${d.pm.mood === m.id ? 'on' : ''}" style="${d.pm.mood === m.id ? '' : 'background:' + m.bg + ';border-color:' + m.bg}" data-act="pmSet" data-arg="mood|${m.id}">${m.label}</button>`).join('')}</div></div>
+  <div><p class="small" style="margin-bottom:6px">Stress (1–10)</p>${scale('pmSet', 'stress', d.pm.stress, 10)}</div>
+  <div><p class="small" style="margin-bottom:6px">Cravings</p>${scale('pmSet', 'cravings', d.pm.cravings, 5)}</div>
+  <label class="f">What helped or got in the way? (optional)<textarea rows="2" data-field="pm.note">${esc(d.pm.note || '')}</textarea></label>
+  <button class="btn" data-act="pmDone">Save</button>`);
+}
+function stepsSheet() {
+  const d = day(viewDate);
+  openSheet(`<div class="between"><h2 style="font-size:20px">Steps</h2><button class="round" style="width:44px;height:44px;background:#ECEAE3" data-act="closeSheet" aria-label="Close"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#26262B" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+  <label class="f">Steps from your iPhone's Health app<input type="number" inputmode="numeric" data-field="steps" value="${esc(d.steps || '')}" placeholder="e.g. 6500"></label>
+  <button class="btn" data-act="closeSheetRender">Save</button>`);
+}
+function cycleSheet() {
+  const cd = cycleDay(viewDate), starts = (S.cycle.starts || []).slice().sort().reverse().slice(0, 4);
+  openSheet(`<div class="between"><h2 style="font-size:20px">Cycle</h2><button class="round" style="width:44px;height:44px;background:#ECEAE3" data-act="closeSheet" aria-label="Close"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#26262B" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+  <p class="t15">${cd ? 'Cycle day ' + cd + ' · ' + phase(cd).name : 'No period logged yet.'}</p>
+  <button class="btn" style="background:var(--pinkD)" data-act="periodStart">My period started ${viewDate === todayStr() ? 'today' : 'on ' + nice(viewDate)}</button>
+  <label class="f">Or pick the date it started (from Stardust)<input type="date" data-field="periodDate" max="${todayStr()}"></label>
+  <button class="btn ghost" data-act="periodPick">Save that date</button>
+  ${starts.length ? `<p class="small">Logged starts: ${starts.map(x => nice(x)).join(', ')}</p><button class="pill" data-act="periodUndo">Remove the latest</button>` : ''}
+  <p class="small">Period days are outlined in pink on your calendar. Cycle days 22–28 become your hold-steady week.</p>`);
+}
+
+/* ---------- WORKOUT ---------- */
+function bodySvg(side, levels) {
+  if (!BODY) return `<div style="height:300px;display:flex;align-items:center;justify-content:center" class="small">Loading body map…</div>`;
+  const pal = ['#E3DFD6', '#A99BE8', '#5B4BA6'];
+  const paths = BODY[side].map(([g, ps]) => { const fill = g === 'hair' ? '#D3CEC3' : g === 'skin' ? '#EDE9E1' : pal[levels[g] || 0]; return ps.map(p => `<path d="${p}" fill="${fill}" stroke="#FBFAF6" stroke-width="3"/>`).join(''); }).join('');
+  return `<svg viewBox="${side === 'front' ? '0 0 650 1450' : '823 0 650 1450'}" style="width:100%;height:auto;max-height:320px" role="img" aria-label="${side === 'front' ? 'Front' : 'Back'} of body, worked muscles highlighted">${paths}</svg>`;
+}
+let BODY = null;
+function wkState(s, code) { const d = day(s); if (!d.workout || d.workout.session !== code) { if (!d.workout || !workoutSets(d)) d.workout = {session:code, sets:{}, warm:{}, stretch:{}, walkMin:walkGoal(s), walkDone:false, sauna:false, open:{}, finished:false}; } return d.workout; }
+let pickedSession = null;
+function renderWorkout() {
+  const s = viewDate, gym = isGymDay(s);
+  const code = pickedSession || sessionFor(s) || 'LA';
+  if (!gym && !pickedSession) {
+    app.innerHTML = `<div class="stack"><header><p class="sub">${nice(s)}</p><h1>Rest day</h1></header>
+    <section class="tile" style="background:var(--lav)"><p class="t15">Rest is where you get stronger. A walk and your stretches are today's plan.</p><button class="btn small" style="background:#5B4BA6" data-act="tab" data-arg="routines">Open routines</button></section>
+    <section class="card"><h2>Do a session anyway</h2>${SESSION_ORDER.map(c => `<button class="listbtn" data-act="pickSession" data-arg="${c}"><span class="round" style="width:40px;height:40px;background:var(--lav);font-weight:800">${c}</span><span class="t15">${SESSIONS[c].name}</span></button>`).join('')}</section></div>`;
+    return;
+  }
+  const w = wkState(s, code), list = exercisesFor(code, s);
+  const levels = {}; let total = 0, done = 0, exDone = 0;
+  const cards = list.map(e => {
+    const n = setsFor(e, s), last = lastFor(e.id, s);
+    let cnt = 0;
+    const lastLoad = last && last.rows[0] ? last.rows[0].kg : '';
+    const rows = [];
+    for (let i = 0; i < n; i++) {
+      const key = e.id + ':' + i, v = w.sets[key] || {};
+      if (!e.optional) total++;
+      if (v.done) { cnt++; if (!e.optional) done++; }
+      const loadVal = v.kg != null ? v.kg : (last && last.rows[i] ? last.rows[i].kg : (last ? lastLoad : ''));
+      const repVal = v.reps != null ? v.reps : '';
+      const secTarget = e.wall ? wallGoal(s) : null;
+      rows.push(`<div class="setgrid"><b style="padding-left:6px">${i + 1}</b>
+        ${e.unit === 'kg' ? `<input class="num ${v.done ? 'done' : ''}" type="number" inputmode="decimal" step="0.5" placeholder="kg" aria-label="Set ${i + 1} weight in kg" data-field="set|${key}|kg" value="${esc(loadVal)}">` : `<span class="small" style="text-align:center">${e.unit === 'sec' ? 'seconds' : e.unit === 'min' ? 'minutes' : 'body weight'}</span>`}
+        <input class="num ${v.done ? 'done' : ''}" type="number" inputmode="numeric" placeholder="${e.unit === 'sec' ? (secTarget || 30) + ' s' : e.unit === 'min' ? '5' : 'reps'}" aria-label="Set ${i + 1} ${e.unit === 'sec' ? 'seconds' : 'reps'}" data-field="set|${key}|reps" value="${esc(repVal)}">
+        <button class="round" style="width:48px;height:44px;border-radius:14px;border:2px solid #5B4BA6;background:${v.done ? '#5B4BA6' : '#fff'}" data-act="setDone" data-arg="${key}" aria-label="Mark set ${i + 1} done"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="${v.done ? '#fff' : '#C9C2EA'}" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"/></svg></button></div>`);
+    }
+    const all = cnt >= n;
+    if (!e.optional) { if (all) exDone++; e.muscles.forEach(m => { levels[m] = Math.max(levels[m] || 0, all ? 2 : cnt ? 1 : 0); }); }
+    let nudge = '';
+    if (last && e.top && e.unit === 'kg' && last.rows.length >= n && last.rows.every(r => Number(r.reps) >= e.top)) nudge = `Last time every set hit ${e.top} reps. Try ${(Number(last.rows[0].kg || 0) + (e.step || 1))} kg.`;
+    const open = w.open[e.id] !== undefined ? w.open[e.id] : !all;
+    const target = e.wall ? `3 × ${wallGoal(s)} sec · leg strength` : (n !== e.sets ? n + ' × ' + e.reps + ' (lighter week)' : n + ' × ' + e.reps);
+    return `<section class="card" style="gap:12px">
+      <div class="row" style="gap:8px">
+        <button style="display:flex;align-items:center;gap:12px;flex:1;background:none;border:none;padding:0;text-align:left;min-height:44px" data-act="tutorial" data-arg="${code}|${e.id}">
+          <span class="round" style="width:40px;height:40px;border-radius:14px;background:${all ? '#5B4BA6' : '#EDE8FB'};color:${all ? '#fff' : '#2F2752'};font-weight:800">${all ? '✓' : list.indexOf(e) + 1}</span>
+          <span style="display:flex;flex-direction:column;flex:1"><span style="font-size:16px;font-weight:800;display:flex;gap:6px;align-items:center">${esc(e.name)}<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#5B4BA6" stroke-width="2.2" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M10 8.5v7l5.5-3.5z" fill="#5B4BA6"/></svg></span><span class="small" style="font-weight:500">${target}${e.optional ? ' · optional' : ''}${cnt ? ' · ' + cnt + ' of ' + n : ''}</span></span>
+        </button>
+        <button class="round" style="width:44px;height:44px;border:1.5px solid #E2DFD7;background:#fff" data-act="toggleOpen" data-arg="${e.id}|${open ? 0 : 1}" aria-label="Show or hide sets"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#26262B" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="${open ? 'M6 15l6-6 6 6' : 'M6 9l6 6 6-6'}"/></svg></button>
+      </div>
+      ${open ? `<div class="stack" style="gap:8px"><div class="setgrid small"><span>Set</span><span>${e.unit === 'kg' ? 'kg' : ''}</span><span>${e.unit === 'sec' ? 'Sec' : e.unit === 'min' ? 'Min' : 'Reps'}</span><span></span></div>${rows.join('')}
+      ${last ? `<p class="small" style="font-weight:500">Last time (${nice(last.date).split(' ').slice(1).join(' ')}): ${last.rows.map(r => (r.kg ? r.kg + ' kg × ' : '') + (r.reps || '–')).join(', ')}</p>` : ''}
+      ${nudge ? `<div style="background:var(--green);border-radius:16px;padding:12px 14px;font-size:14px;font-weight:700">↑ ${nudge}</div>` : ''}</div>` : ''}
+    </section>`;
+  }).join('');
+  const warm = [['desk','Undo the desk','7 min · chin tucks, chest, hip flexors, upper back'],['sets','Light warm-up sets','1–2 easy sets of the first exercise']].map(([k, l, dd]) => `<button class="listbtn" data-act="wkToggle" data-arg="warm|${k}">${chk(w.warm[k], 'var(--lavD)')}<span style="display:flex;flex-direction:column"><span class="t15">${l}</span><span class="small" style="font-weight:500">${dd}</span></span></button>`).join('');
+  const stretch = SPLIT.map(x => `<button class="listbtn" data-act="wkToggle" data-arg="stretch|${x.id}">${chk(w.stretch[x.id], 'var(--pinkD)')}<span style="display:flex;flex-direction:column"><span class="t15">${x.name}</span><span class="small" style="font-weight:500">${x.dose}</span></span></button>`).join('');
+  const wg = walkGoal(s), cd = cycleDay(s), ph = phase(cd);
+  app.innerHTML = `<div class="stack">
+  <header class="between" style="align-items:flex-end"><div><p class="sub">${nice(s)} · Week ${weekOf(s)}</p><h1>${SESSIONS[code].name}</h1></div>${pickedSession || !gym ? '' : `<button class="pill" data-act="sessionMenu">Switch</button>`}</header>
+  ${lighterWeek(s) ? `<p class="small" style="background:var(--green);padding:10px 14px;border-radius:16px;color:#26262B">Lighter week: 2 sets and moderate weights. Fresh legs for what's next.</p>` : ''}
+  ${ph && ph.key === 'pms' && S.settings.prefs.pms ? `<p class="small" style="background:var(--pink);padding:10px 14px;border-radius:16px;color:#6E2443">Hold-steady week: fewer sets or lighter weights still count as a full win.</p>` : ''}
+  <section class="tile" style="background:var(--lav);border-radius:28px" aria-label="Muscles worked">
+    <div class="between"><b>${done} of ${total} sets</b><span class="small" style="color:#463E66">${exDone} of ${list.filter(e => !e.optional).length} exercises</span></div>
+    ${bar(total ? done / total : 0, '#5B4BA6', '#F1EDFC')}
+    <div class="grid2" style="background:#FBFAF6;border-radius:22px;padding:12px 6px 8px;gap:4px"><figure style="margin:0;text-align:center">${bodySvg('front', levels)}<figcaption class="small">Front</figcaption></figure><figure style="margin:0;text-align:center">${bodySvg('back', levels)}<figcaption class="small">Back</figcaption></figure></div>
+    <div class="row small" style="justify-content:center;gap:14px;color:#463E66"><span class="row" style="gap:6px"><i style="width:12px;height:12px;border-radius:4px;background:#5B4BA6"></i>Worked</span><span class="row" style="gap:6px"><i style="width:12px;height:12px;border-radius:4px;background:#A99BE8"></i>In progress</span><span class="row" style="gap:6px"><i style="width:12px;height:12px;border-radius:4px;background:#E3DFD6"></i>Not yet</span></div>
+  </section>
+  <section class="card" style="gap:2px"><h2 style="margin-bottom:6px">Warm-up</h2>${warm}</section>
+  ${cards}
+  <section class="tile" style="background:var(--blue)" aria-label="Incline walk">
+    <div class="between"><span class="chip">Incline walk</span><span class="small" style="color:#3E4A5C">Goal this week: ${wg} min</span></div>
+    <div class="between"><button class="round" style="background:#fff;width:52px;height:52px" data-act="walk" data-arg="-1" aria-label="One minute less">−</button><div style="text-align:center"><div style="font-size:34px;font-weight:800">${w.walkMin} min</div><div class="small" style="color:#3E4A5C">${w.walkMin > wg ? (w.walkMin - wg) + ' min over goal' : w.walkMin === wg ? 'Right on goal' : (wg - w.walkMin) + ' min under goal: still counts'}</div></div><button class="round" style="background:#fff;width:52px;height:52px" data-act="walk" data-arg="1" aria-label="One minute more">+</button></div>
+    ${bar(w.walkMin / wg, '#3F6FB8', '#EEF4FD')}
+    <div class="between"><span class="small" style="color:#3E4A5C">${weekOf(s) >= 5 ? '8–12% incline' : '5–8% incline'} · 4.5–5 km/h · can still talk</span><button class="round" style="width:52px;height:52px;border:2px solid #3F6FB8;background:${w.walkDone ? '#3F6FB8' : '#fff'}" data-act="wkFlag" data-arg="walkDone" aria-label="Mark incline walk done"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="${w.walkDone ? '#fff' : '#B9CDEB'}" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"/></svg></button></div>
+  </section>
+  <section class="card" style="gap:2px"><div class="between" style="margin-bottom:6px"><h2>Stretching · split routine</h2><span class="small">12 min</span></div>${stretch}</section>
+  <section class="tile" style="background:var(--sand)" aria-label="Sauna"><div class="between"><div><span class="chip">Sauna · optional</span><p style="font-size:18px;font-weight:800;margin-top:6px">10–15 min</p><p class="small" style="color:#5A4630">Drink an extra 0.5 L. A bonus, not part of your score.</p></div><button class="round" style="width:52px;height:52px;border:2px solid #9A6A2A;background:${w.sauna ? '#9A6A2A' : '#fff'}" data-act="wkFlag" data-arg="sauna" aria-label="Mark sauna done"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="${w.sauna ? '#fff' : '#E2CBA6'}" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"/></svg></button></div></section>
+  <button class="btn" data-act="finish">${w.finished ? 'Workout saved ✓' : 'Finish workout'}</button>
+  <p class="small" style="text-align:center;font-weight:500">Animations: <a href="https://bryllim.github.io/workout-guide/">Workout Guide</a> by Bryl Lim (Everkinetic, CC BY-SA 4.0). Body map: <a href="https://github.com/melihcolpan/MuscleMap">MuscleMap</a> by Melih Colpan (MIT).</p>
+  </div>`;
+}
+function tutorialSheet(code, id) {
+  const e = SESSIONS[code].exercises.find(x => x.id === id);
+  openSheet(`<div class="between"><div><p class="small" style="color:#463E66">How to do it</p><h2 style="font-size:22px">${esc(e.name)}</h2></div><button class="round" style="width:44px;height:44px;background:#ECEAE3" data-act="closeSheet" aria-label="Close"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#26262B" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+  ${e.slug ? frames(e.slug, '#5B4BA6') : `<div class="anim" style="background:#5B4BA6;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;padding:24px;text-align:center">No animation for this one yet. Follow the steps below.</div>`}
+  ${e.note ? `<p class="small" style="color:#463E66">${esc(e.note)}</p>` : ''}
+  <ol style="margin:0;padding-left:22px;display:flex;flex-direction:column;gap:8px">${e.cues.map(c => `<li>${esc(c)}</li>`).join('')}</ol>
+  <div style="background:var(--pink);border-radius:16px;padding:12px 14px"><b style="font-size:12px;color:#6E2443">Avoid</b><p style="font-size:14px;font-weight:600">${esc(e.avoid)}</p></div>
+  <button class="btn" data-act="closeSheet">Got it</button>`);
+}
+
+/* ---------- ROUTINES ---------- */
+let R = {tab:'morning', idx:0, left:60, playing:false, done:{}};
+function rMoves() { return ROUTINES[R.tab].moves; }
+function renderRoutines() {
+  const mv = rMoves()[R.idx], c = 2 * Math.PI * 48, frac = mv[2] ? R.left / mv[2] : 0;
+  const doneN = Object.keys(R.done).filter(k => k.startsWith(R.tab + ':') && R.done[k]).length;
+  app.innerHTML = `<div class="stack">
+  <header class="between" style="align-items:flex-end"><div><p class="sub">Stretch streak · ${streak(d => d.routines && (d.routines.morning || d.routines.after || d.routines.evening))} days</p><h1>Routines</h1></div><span class="small" style="font-size:13px">${ROUTINES[R.tab].meta}</span></header>
+  <div class="seg" role="tablist" style="grid-template-columns:repeat(4,1fr)">${Object.keys(ROUTINES).map(k => `<button role="tab" class="${R.tab === k ? 'on' : ''}" data-act="rTab" data-arg="${k}">${ROUTINES[k].label}</button>`).join('')}</div>
+  <section class="tile" style="background:var(--pink);border-radius:28px;gap:14px">
+    <div class="between"><span class="chip">Move ${R.idx + 1} of ${rMoves().length}</span><span class="small" style="color:#6E2443">${doneN} done</span></div>
+    ${mv[3] ? frames(mv[3], '#B8436F', 220) : ''}
+    <div><h2 style="font-size:22px">${esc(mv[0])}</h2><p class="small" style="color:#6E2443;font-size:14px">${esc(mv[1])}</p><p style="font-size:14px;margin-top:4px">${esc(mv[4])}</p></div>
+    <div class="between">
+      <button class="round" style="background:#fff;width:52px;height:52px" data-act="rPrev" aria-label="Previous move"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#26262B" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg></button>
+      <div class="ringwrap" style="width:112px;height:112px"><svg width="112" height="112" viewBox="0 0 112 112" aria-hidden="true"><circle cx="56" cy="56" r="48" fill="none" stroke="#FDEEF3" stroke-width="10"/><circle id="rRing" cx="56" cy="56" r="48" fill="none" stroke="#B8436F" stroke-width="10" stroke-linecap="round" stroke-dasharray="${(c * frac).toFixed(1)} ${c.toFixed(1)}" transform="rotate(-90 56 56)"/></svg>
+        <button style="position:absolute;inset:14px;border-radius:999px;border:none;background:#26262B;color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center" data-act="rPlay" aria-label="${R.playing ? 'Pause' : 'Start'} timer"><b id="rTime" style="font-size:22px">${Math.floor(R.left / 60)}:${pad(R.left % 60)}</b><span style="font-size:11px;font-weight:700">${R.playing ? 'Pause' : R.left === mv[2] ? 'Start' : 'Resume'}</span></button></div>
+      <button class="round" style="background:#fff;width:52px;height:52px" data-act="rNext" aria-label="Done, next move"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#26262B" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></button>
+    </div>
+    <p class="small" style="text-align:center;color:#6E2443">Mild stretch only, about 3–4 out of 10. Never pain.</p>
+  </section>
+  <section class="card" style="gap:2px"><h2 style="margin-bottom:6px">All moves</h2>
+  ${rMoves().map((m, i) => `<div class="row" style="border-top:${i ? '1px solid #F1EFE9' : 'none'};padding:4px 0"><button style="width:44px;height:44px;border:none;background:none;padding:0;display:flex;align-items:center;justify-content:center" data-act="rToggle" data-arg="${i}" aria-label="Mark ${esc(m[0])} done">${chk(R.done[R.tab + ':' + i], 'var(--pinkD)')}</button><button style="flex:1;min-height:48px;text-align:left;border:none;border-radius:12px;padding:4px 10px;background:${i === R.idx ? '#FDEEF3' : 'transparent'}" data-act="rJump" data-arg="${i}"><span class="t15" style="display:block">${esc(m[0])}</span><span class="small" style="font-weight:500">${esc(m[1])}</span></button></div>`).join('')}
+  </section>
+  <button class="btn" style="background:var(--pinkD)" data-act="rComplete">Mark ${ROUTINES[R.tab].label.toLowerCase()} routine done</button>
+  <p class="small" style="text-align:center;font-weight:500">On bad days, 2 minutes counts: chin tucks, doorway stretch, child's pose.</p>
+  </div>`;
+}
+function rGo(i) { const m = rMoves(); R.idx = Math.max(0, Math.min(m.length - 1, i)); R.left = m[R.idx][2]; }
+function rFinishMove() {
+  R.done[R.tab + ':' + R.idx] = true;
+  if (R.idx >= rMoves().length - 1) { R.playing = false; completeRoutine(); } else rGo(R.idx + 1);
+  render();
+}
+function completeRoutine() { const key = R.tab === 'split' ? 'evening' : R.tab; const d = day(todayStr()); d.routines[key] = true; saveDay(todayStr()); toast(ROUTINES[R.tab].label + ' routine done. Nice work.'); }
+setInterval(() => {
+  if (!R.playing || tab !== 'routines') return;
+  R.left -= 1;
+  if (R.left <= 0) { rFinishMove(); return; }
+  const t = document.getElementById('rTime'), rr = document.getElementById('rRing'), mv = rMoves()[R.idx];
+  if (t) t.textContent = Math.floor(R.left / 60) + ':' + pad(R.left % 60);
+  if (rr) { const c = 2 * Math.PI * 48; rr.setAttribute('stroke-dasharray', (c * R.left / mv[2]).toFixed(1) + ' ' + c.toFixed(1)); }
+}, 1000);
+
+/* ---------- PROGRESS ---------- */
+function streak(test) { let n = 0, s = todayStr(); if (!S.days[s] || !test(S.days[s])) s = addDays(s, -1); while (S.days[s] && test(S.days[s])) { n++; s = addDays(s, -1); } return n; }
+function weeklyAvgs() { const by = {}; Object.keys(S.days).forEach(k => { const w = S.days[k].am && Number(S.days[k].am.weight); if (w) { const wk = weekOf(k); (by[wk] = by[wk] || []).push(w); } }); return Object.keys(by).map(Number).sort((a, b) => a - b).map(wk => ({wk, avg: by[wk].reduce((a, b) => a + b, 0) / by[wk].length})); }
+function latestMeas(field) { const m = (S.meas || []).filter(x => x[field] != null).sort((a, b) => a.date < b.date ? -1 : 1); return m.length ? {first:m[0][field], last:m[m.length - 1][field]} : null; }
+function bestWall() { let b = 0; Object.values(S.days).forEach(d => { if (d.workout && d.workout.sets) Object.entries(d.workout.sets).forEach(([k, v]) => { if (k.startsWith('wall:') && v.done) b = Math.max(b, Number(v.reps) || 0); }); }); return b; }
+function bestWalk() { let b = 0; for (let i = 0; i < 14; i++) { const d = S.days[addDays(todayStr(), -i)]; if (d && d.workout && d.workout.walkDone) b = Math.max(b, d.workout.walkMin || 0); } return b; }
+function avg(a) { return a.length ? a.reduce((x, y) => x + y, 0) / a.length : null; }
+function patterns() {
+  const days = Object.keys(S.days).sort().map(k => [k, S.days[k]]).filter(([k, d]) => d.pm && d.pm.done);
+  const out = [];
+  const moodV = d => (MOODS.find(m => m.id === d.pm.mood) || {}).v;
+  const offCount = d => MEALS.filter(m => d.meals[m.id] && d.meals[m.id].status === 'off').length;
+  const add = (from, fromBg, to, toBg, aL, a, bL, b, unit, max, text) => { if (a.length >= 3 && b.length >= 3) { const A = avg(a), B = avg(b); out.push({from, fromBg, to, toBg, diff:Math.abs(A - B) / max, text: text(A, B), bars:[[aL, A, '#5B4BA6'], [bL, B, '#B7ACEB']], unit, max}); } };
+  const sl = days.filter(([k, d]) => d.am && d.am.sleepH && d.pm.energy);
+  add('Sleep', '#D6E5FA', 'Energy', '#E4ECB4', '7+ hours', sl.filter(([k, d]) => d.am.sleepH >= 7).map(([k, d]) => d.pm.energy), 'Under 7 hours', sl.filter(([k, d]) => d.am.sleepH < 7).map(([k, d]) => d.pm.energy), '/5', 5, (A, B) => A > B ? 'After 7+ hours of sleep, your energy was higher.' : 'Sleep length made little difference to your energy so far.');
+  const cy = days.filter(([k, d]) => cycleDay(k) && d.pm.cravings);
+  add('Cycle', '#F8D3E1', 'Cravings', '#F3E3C9', 'Days 22–28', cy.filter(([k]) => cycleDay(k) >= 22).map(([k, d]) => d.pm.cravings), 'Other days', cy.filter(([k]) => cycleDay(k) < 22).map(([k, d]) => d.pm.cravings), '/5', 5, (A, B) => A > B ? 'Cravings rise in your premenstrual week.' : 'Cravings stay fairly even across your cycle.');
+  const st = days.filter(([k, d]) => d.pm.stress);
+  add('Stress', '#F3E3C9', 'Off-plan meals', '#F3E3C9', 'Stress 7+', st.filter(([k, d]) => d.pm.stress >= 7).map(([k, d]) => offCount(d)), 'Stress under 7', st.filter(([k, d]) => d.pm.stress < 7).map(([k, d]) => offCount(d)), ' per day', 3, (A, B) => A > B ? 'Off-plan eating happens more on high-stress days.' : 'Stress doesn\'t seem to drive your eating so far.');
+  add('Gym day', '#DCD3F7', 'Mood', '#E4ECB4', 'Gym days', days.filter(([k, d]) => workoutDone(d) && moodV(d)).map(([k, d]) => moodV(d)), 'Other days', days.filter(([k, d]) => !workoutDone(d) && moodV(d)).map(([k, d]) => moodV(d)), '/5', 5, (A, B) => A > B ? 'Your mood is higher on days you train.' : 'Training days and rest days feel similar so far.');
+  add('Water', '#D6E5FA', 'Energy', '#E4ECB4', '1 L by 11:00', days.filter(([k, d]) => d.pm.energy && waterBy(d, '11:00') >= 1000).map(([k, d]) => d.pm.energy), 'Less', days.filter(([k, d]) => d.pm.energy && waterBy(d, '11:00') < 1000).map(([k, d]) => d.pm.energy), '/5', 5, (A, B) => A > B ? 'Front-loading water goes with better energy.' : 'Water timing hasn\'t changed your energy much yet.');
+  return {n: days.length, list: out.sort((a, b) => b.diff - a.diff)};
+}
+const CHANGE = {Sleep:'Protect sleep: start your wind-down 15 minutes earlier.', Cycle:'Plan an extra satisfying snack for days 22–28.', Stress:'On stressful days, have your planned evening snack ready and do the 2-minute reset first.', 'Gym day':'Keep showing up on gym days, even for the minimum session.', Water:'Aim for 1 L before lunch.'};
+function renderProgress() {
+  const t = todayStr(), mon = mondayOf(t), wavg = weeklyAvgs(), sw = startWeight(), g = G(), w1 = g.weight1 ? Number(g.weight1) : null, START = startD(), END = endD();
+  const nowW = wavg.length ? wavg[wavg.length - 1].avg : null;
+  const split = latestMeas('split'), toe = latestMeas('toe');
+  const goals = [
+    ['Weight', w1 ? w1 + ' kg' + (g.date1 ? ' by ' + short(g.date1) : '') : 'Set a goal in Settings', sw ? sw.toFixed(1) : '–', nowW ? nowW.toFixed(1) : '–', w1 ? String(w1) : '–', nowW && sw && w1 && sw !== w1 ? (sw - nowW) / (sw - w1) : 0, '#D6E5FA', '#3F6FB8'],
+    ['Front split', g.split ? 'Gap to floor, ' + short(g.split) : 'Gap to floor', split ? split.first + ' cm' : '–', split ? split.last + ' cm' : '–', '0 cm', split && split.first ? (split.first - split.last) / split.first : 0, '#F8D3E1', '#B8436F'],
+    ['Leg strength', 'Wall sit' + (g.trip ? ' by ' + short(g.trip) : ''), '30 s', bestWall() ? bestWall() + ' s' : '–', '60 s', bestWall() ? (bestWall() - 30) / 30 : 0, '#DCD3F7', '#5B4BA6'],
+    ['Walking fitness', 'Incline walk', '10 min', bestWalk() ? bestWalk() + ' min' : '–', '30 min', bestWalk() ? (bestWalk() - 10) / 20 : 0, '#E4ECB4', '#5E7A1E']
+  ];
+  const span = diffDays(START, END), here = Math.max(0, Math.min(1, diffDays(START, t) / span));
+  const mk = (date, label, sub, bg, bd, above) => { const x = diffDays(START, date) / span * 100; return `<i style="position:absolute;left:${x}%;top:58px;width:16px;height:16px;margin-left:-8px;border-radius:999px;background:${bg};border:2px solid ${bd}"></i><span style="position:absolute;left:${x}%;top:${above ? 18 : 84}px;transform:translateX(${x > 90 ? '-100%' : x < 10 ? '-10%' : '-50%'});font-size:11px;font-weight:700;line-height:1.3;white-space:nowrap;text-align:center">${label}<br><span style="color:#5E5E66;font-weight:600">${sub}</span></span>`; };
+  // weekly plan vs done
+  const daysSoFar = []; for (let i = 0; i < 7; i++) { const s = addDays(mon, i); if (s <= t && s >= START) daysSoFar.push(s); }
+  const cnt = (f) => daysSoFar.filter(s => f(day(s), s)).length;
+  const gymDays = daysSoFar.filter(isGymDay);
+  const planned = [
+    ['Workouts', gymDays.filter(s => workoutDone(day(s))).length, gymDays.length, '#5B4BA6', '#EDE8FB'],
+    ['Water goal', cnt((d, s) => waterTotal(d) >= waterGoal(s)), daysSoFar.length, '#4F7FCC', '#E5EDF8'],
+    ['Protein goal', cnt(d => protein(d) >= S.settings.protein), daysSoFar.length, '#9DB53A', '#F0F4DA'],
+    ['Stretching', daysSoFar.reduce((a, s) => a + ['morning','after','evening'].filter(k => day(s).routines[k]).length, 0), daysSoFar.length * 3, '#B8436F', '#FBE6EE'],
+    ['Lights out on time', cnt(d => d.habits.windDown), daysSoFar.length, '#26262B', '#ECEAE3']
+  ];
+  const pDone = planned.reduce((a, p) => a + p[1], 0), pTot = planned.reduce((a, p) => a + p[2], 0);
+  const cons = pTot ? pDone / pTot : 0;
+  // wins
+  const wins = [];
+  const ws = streak(d => d.water && waterTotal(d) >= 1500); if (ws >= 2) wins.push(ws + '-day water streak');
+  if (gymDays.length && gymDays.every(s => workoutDone(day(s)))) wins.push('All planned workouts done');
+  const ps = streak(d => d.meals && protein(d) >= S.settings.protein); if (ps >= 2) wins.push(ps + '-day protein streak');
+  if (split && split.first > split.last) wins.push('Split ' + (split.first - split.last) + ' cm closer');
+  if (toe && toe.first > toe.last) wins.push('Toe-touch ' + (toe.first - toe.last) + ' cm closer');
+  if (bestWall() >= 45) wins.push('Wall sit ' + bestWall() + ' sec');
+  if (wavg.length >= 2 && wavg[wavg.length - 1].avg < wavg[0].avg) wins.push((wavg[0].avg - wavg[wavg.length - 1].avg).toFixed(1) + ' kg down');
+  const P = patterns();
+  // weight chart
+  const W = 320, H = 150, swc = sw || (wavg[0] ? wavg[0].avg : 70), tw = w1 || swc - 5, maxW = Math.max(swc, ...wavg.map(x => x.avg)) + 0.5, minW = Math.min(tw - 0.5, ...wavg.map(x => x.avg)) - 0.5;
+  const tWk = g.date1 ? Math.max(2, weekOf(g.date1)) : 14; const lastWk = Math.max(tWk, ...wavg.map(x => x.wk));
+  const X = wk => 34 + (wk) / lastWk * (W - 44), Y = kg => 12 + (maxW - kg) / (maxW - minW) * (H - 36);
+  const pts = (sw ? [[0, sw]] : []).concat(wavg.map(x => [x.wk, x.avg]));
+  const chart = `<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:auto" role="img" aria-label="Weekly average weight versus target pace">${[swc, Math.round((swc + tw) / 2), tw].map(v => `<line x1="34" x2="${W - 6}" y1="${Y(v)}" y2="${Y(v)}" stroke="#F1EFE9"/><text x="0" y="${Y(v) + 4}" font-size="11" font-weight="600" fill="#5E5E66">${v}</text>`).join('')}${w1 ? `<line x1="${X(0)}" y1="${Y(swc)}" x2="${X(tWk)}" y2="${Y(w1)}" stroke="#A99BE8" stroke-width="2" stroke-dasharray="5 5"/>` : ''}<polyline points="${pts.map(p => X(p[0]) + ',' + Y(p[1])).join(' ')}" fill="none" stroke="#4F7FCC" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>${pts.map(p => `<circle cx="${X(p[0])}" cy="${Y(p[1])}" r="4.5" fill="#fff" stroke="#4F7FCC" stroke-width="3"/>`).join('')}<text x="${X(0)}" y="${H - 6}" font-size="11" font-weight="600" fill="#5E5E66">Start</text>${g.date1 ? `<text x="${X(tWk)}" y="${H - 6}" font-size="11" font-weight="600" fill="#5E5E66" text-anchor="end">${short(g.date1)}</text>` : ''}</svg>`;
+  // calendar
+  const vd = parse(viewDate), first = new Date(vd.getFullYear(), vd.getMonth(), 1), dim = new Date(vd.getFullYear(), vd.getMonth() + 1, 0).getDate();
+  let cal = ''; for (let i = 0; i < (first.getDay() + 6) % 7; i++) cal += '<div></div>';
+  for (let i = 1; i <= dim; i++) { const s = ymd(new Date(vd.getFullYear(), vd.getMonth(), i)), d = S.days[s], mo = d && d.pm && MOODS.find(m => m.id === d.pm.mood), cd = cycleDay(s); cal += `<div style="background:${mo ? mo.bg : '#F6F4EF'};border-color:${cd && cd <= 5 ? '#B8436F' : 'transparent'}"><span>${i}</span><i style="align-self:flex-end;width:7px;height:7px;border-radius:9px;background:${d && workoutDone(d) ? '#26262B' : 'transparent'}"></i></div>`; }
+  // radial
+  const groups = [['Legs', ['quads','hamstrings','calves','adductors'], '#5B4BA6'], ['Glutes', ['glutes'], '#7C6CC4'], ['Back', ['back','lowerBack','traps'], '#4F7FCC'], ['Chest', ['chest'], '#7FA6E0'], ['Shoulders & arms', ['shoulders','arms','forearms'], '#9DB53A'], ['Core', ['core'], '#B8436F']];
+  const gv = groups.map(() => 0);
+  for (let i = 0; i < 7; i++) { const s = addDays(mon, i), d = S.days[s]; if (!d || !d.workout || !d.workout.sets) continue; const code = d.workout.session; Object.entries(d.workout.sets).forEach(([k, v]) => { if (!v.done) return; const e = SESSIONS[code] && SESSIONS[code].exercises.find(x => x.id === k.split(':')[0]); if (!e) return; groups.forEach((g, gi) => { if (e.muscles.some(m => g[1].includes(m))) gv[gi]++; }); }); }
+  const maxV = Math.max(4, ...gv), cx = 160, cy = 140;
+  const radial = `<svg viewBox="0 0 320 290" style="width:100%;height:auto" role="img" aria-label="Sets this week by muscle group: ${groups.map((g, i) => g[0] + ' ' + gv[i]).join(', ')}"><circle cx="${cx}" cy="${cy}" r="30" fill="#F6F4EF"/><circle cx="${cx}" cy="${cy}" r="108" fill="none" stroke="#F1EFE9"/>${groups.map((g, i) => { const a0 = (-90 + i * 60 + 3) * Math.PI / 180, a1 = (-90 + (i + 1) * 60 - 3) * Math.PI / 180, r0 = 32, r1 = r0 + Math.max(2, gv[i] / maxV * 76); const P = (r, a) => [(cx + r * Math.cos(a)).toFixed(1), (cy + r * Math.sin(a)).toFixed(1)]; const [x1, y1] = P(r0, a0), [x2, y2] = P(r1, a0), [x3, y3] = P(r1, a1), [x4, y4] = P(r0, a1), am = (a0 + a1) / 2, [lx, ly] = P(124, am); return `<path d="M${x1} ${y1}L${x2} ${y2}A${r1} ${r1} 0 0 1 ${x3} ${y3}L${x4} ${y4}A${r0} ${r0} 0 0 0 ${x1} ${y1}Z" fill="${g[2]}"/><text x="${lx}" y="${Number(ly) - 2}" font-size="12" font-weight="800" fill="#26262B" text-anchor="middle">${gv[i]} sets</text><text x="${lx}" y="${Number(ly) + 12}" font-size="11" font-weight="600" fill="#4E4E56" text-anchor="middle">${g[0]}</text>`; }).join('')}</svg>`;
+  const daysToSplit = g.split ? diffDays(t, g.split) : null;
+  app.innerHTML = `<div class="stack">
+  <header><p class="sub">Week ${weekOf(t)}</p><h1>Progress</h1></header>
+  <section class="card" style="border-radius:28px;gap:16px" aria-label="Your goals">
+    <div class="between"><h2>Your goals</h2><span class="small">${short(START)} → ${short(END)}</span></div>
+    <div style="position:relative;height:128px;margin:0 6px">
+      <div style="position:absolute;left:0;right:0;top:62px;height:8px;border-radius:9px;background:#F1EFE9"></div>
+      <div style="position:absolute;left:0;top:62px;height:8px;width:${here * 100}%;border-radius:9px;background:#5B4BA6"></div>
+      ${g.trip ? mk(g.trip, esc(g.tripName || 'Trip'), short(g.trip), '#DCD3F7', '#5B4BA6', false) : ''}${g.date1 && w1 ? mk(g.date1, w1 + ' kg', short(g.date1), '#D6E5FA', '#3F6FB8', true) : ''}${g.split ? mk(g.split, 'Front split', short(g.split), '#F8D3E1', '#B8436F', false) : ''}${g.date2 && g.weight2 ? mk(g.date2, g.weight2 + ' kg', short(g.date2), '#E4ECB4', '#5E7A1E', true) : ''}${!g.trip && !g.date1 && !g.split && !g.date2 ? '<span class="small" style="position:absolute;left:0;right:0;top:92px;text-align:center">Add goal dates in Settings to see them here.</span>' : ''}
+      <i style="position:absolute;left:${here * 100}%;top:54px;width:24px;height:24px;margin-left:-12px;border-radius:99px;background:#5B4BA6;border:4px solid #fff;box-shadow:0 0 0 2px #5B4BA6"></i>
+      <span style="position:absolute;left:0;top:0;font-size:11px;font-weight:800;color:#5B4BA6">You are here</span>
+    </div>
+    <div class="grid2" style="gap:10px">${goals.map(g => `<div style="background:${g[6]};border-radius:22px;padding:12px;display:flex;flex-direction:column;gap:10px"><div class="row">${ring(56, 23, 8, [{pct:g[5], color:g[7], track:'#fff'}], `<b style="font-size:13px">${Math.round(Math.max(0, Math.min(1, g[5])) * 100)}%</b>`)}<span style="display:flex;flex-direction:column"><b style="font-size:14px;line-height:1.25">${g[0]}</b><span class="small" style="font-size:11px">${g[1]}</span></span></div><div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));text-align:center;background:#fff;border-radius:14px;padding:8px 2px">${[['Start', g[2]], ['Now', g[3]], ['Goal', g[4]]].map(([l, v], i) => `<span style="display:flex;flex-direction:column"><span style="font-size:10.5px;font-weight:700;color:#5E5E66">${l}</span><b style="font-size:13px;${i === 1 ? 'color:' + g[7] : ''}">${v}</b></span>`).join('')}</div></div>`).join('')}</div>
+    <button class="pill" data-act="measSheet">Log split or toe-touch</button>
+  </section>
+  <section class="card" style="border-radius:28px;gap:14px" aria-label="This week">
+    <div class="row" style="gap:16px">${ring(92, 38, 12, [{pct:cons, color:'#5B4BA6'}], `<b style="font-size:22px">${Math.round(cons * 100)}%</b>`)}<div><p class="small" style="font-size:13px">Week ${weekOf(t)} so far</p><p style="font-size:18px;font-weight:800">Consistency</p><p class="small" style="font-weight:500;font-size:14px">${S.settings.prefs.minimum ? 'Minimum versions count as full wins.' : 'Planned vs. done.'}</p></div></div>
+    ${planned.map(p => `<div><div class="between" style="font-size:14px;font-weight:700"><span>${p[0]}</span><span style="color:#4E4E56">${p[1]} of ${p[2]}</span></div>${bar(p[2] ? p[1] / p[2] : 0, p[3], p[4])}</div>`).join('')}
+  </section>
+  <section class="tile" style="background:var(--green);border-radius:26px" aria-label="Wins this week">
+    <span class="chip">Wins</span>
+    ${wins.length ? `<div class="choices">${wins.map(w => `<span style="font-size:14px;font-weight:700;padding:10px 14px;border-radius:16px;background:#fff">${esc(w)}</span>`).join('')}</div>` : `<p class="small" style="color:#4A5226">Your wins will appear here as you log: streaks, heavier lifts, centimetres closer to your split.</p>`}
+  </section>
+  <section class="tile" style="background:var(--lav);border-radius:28px;gap:12px" aria-label="Patterns and connections">
+    <div class="between"><span class="chip">Patterns &amp; connections</span><span class="small" style="color:#463E66">${P.n} check-ins</span></div>
+    ${P.list.length ? P.list.map(p => `<div style="background:#fff;border-radius:20px;padding:14px;display:flex;flex-direction:column;gap:10px"><div class="row" style="gap:6px;flex-wrap:wrap"><span style="font-size:12px;font-weight:800;padding:4px 10px;border-radius:99px;background:${p.fromBg}">${p.from}</span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#26262B" stroke-width="2.4" stroke-linecap="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg><span style="font-size:12px;font-weight:800;padding:4px 10px;border-radius:99px;background:${p.toBg}">${p.to}</span></div><p style="font-size:15px;font-weight:700">${p.text}</p>${p.bars.map(b => `<div style="display:grid;grid-template-columns:104px minmax(0,1fr) 52px;gap:8px;align-items:center"><span class="small" style="font-weight:600">${b[0]}</span>${bar(b[1] / p.max, b[2])}<b style="font-size:12px;text-align:right">${b[1].toFixed(1)}${p.unit === '/5' ? '/5' : ''}</b></div>`).join('')}</div>`).join('') + `<div style="background:#5B4BA6;border-radius:20px;padding:14px;color:#fff"><b style="font-size:12px;color:#E4DEFA">One change for next week</b><p style="font-size:15px;font-weight:700">${CHANGE[P.list[0].from]}</p></div>` : `<div style="background:#fff;border-radius:20px;padding:14px"><p class="t15">Patterns appear after about 2 weeks of evening check-ins.</p><p class="small" style="font-weight:500;margin-top:4px">We'll look at sleep → energy, cycle → cravings, stress → eating, gym days → mood and water timing → energy. ${P.n ? P.n + ' check-ins so far.' : ''}</p></div>`}
+    <p class="small" style="color:#463E66">These show connections in your data, not proven causes.</p>
+  </section>
+  <section class="card" style="border-radius:28px" aria-label="Weight trend">
+    <div class="between"><h2>Weight · weekly average</h2><span class="small">${w1 ? 'Goal ' + w1 + ' kg' : ''}</span></div>
+    <p style="font-size:28px;font-weight:800">${nowW ? nowW.toFixed(1) + ' kg' : 'No weigh-ins yet'} ${nowW && sw ? `<span style="font-size:14px;color:#4A5226">${(nowW - sw) <= 0 ? '−' : '+'}${Math.abs(nowW - sw).toFixed(1)} kg</span>` : ''}</p>
+    ${chart}
+    <div class="row small" style="gap:16px"><span class="row" style="gap:6px"><i style="width:16px;height:3px;background:#4F7FCC"></i>Your average</span><span class="row" style="gap:6px"><i style="width:16px;border-top:2px dashed #A99BE8"></i>Target pace</span></div>
+  </section>
+  <section class="card" style="border-radius:28px" aria-label="Mood and cycle">
+    <div class="between"><h2>Mood &amp; cycle</h2><span class="small">${MONTHS[vd.getMonth()]}</span></div>
+    <div class="cal small" style="text-align:center">${['Mo','Tu','We','Th','Fr','Sa','Su'].map(x => `<span>${x}</span>`).join('')}</div>
+    <div class="cal">${cal}</div>
+    <div class="grid2 small" style="gap:6px 12px">${MOODS.map(m => `<span class="row" style="gap:8px"><i style="width:14px;height:14px;border-radius:4px;background:${m.bg}"></i>${m.label}</span>`).join('')}<span class="row" style="gap:8px"><i style="width:14px;height:14px;border-radius:4px;border:2px solid #B8436F"></i>Period</span><span class="row" style="gap:8px"><i style="width:8px;height:8px;border-radius:9px;background:#26262B;margin:0 3px"></i>Workout</span></div>
+  </section>
+  <section class="card" style="border-radius:28px" aria-label="Sets by muscle group"><div class="between"><h2>Sets by muscle group</h2><span class="small">This week</span></div>${radial}</section>
+  <section class="tile" style="background:var(--pink);border-radius:26px" aria-label="Front split">
+    <div class="between"><span class="chip">Front split${g.split ? ' · ' + short(g.split) : ''}</span><span class="small" style="color:#6E2443">${daysToSplit == null ? 'Set a date in Settings' : daysToSplit > 0 ? daysToSplit + ' days to go' : 'Today!'}</span></div>
+    <p style="font-size:24px;font-weight:800">${split ? split.last + ' cm' : 'Not measured yet'} ${split ? `<span style="font-size:14px;color:#6E2443">from the floor · was ${split.first}</span>` : ''}</p>
+    ${bar(split && split.first ? (split.first - split.last) / split.first : 0, '#B8436F', '#FDEEF3')}
+    <div class="between small" style="color:#6E2443;font-size:11px"><span>Start</span><span>¼</span><span>½</span><span>¾</span><span>${g.split ? short(g.split) : 'Goal'}</span></div>
+    <p class="small" style="color:#26262B">${toe ? 'Toe-touch: ' + toe.last + ' cm from the floor (was ' + toe.first + ').' : 'Measure your toe-touch on Sunday mornings after a warm-up.'}</p>
+  </section>
+  <section class="grid2" style="grid-template-columns:repeat(3,minmax(0,1fr));gap:10px" aria-label="Streaks">
+    ${[['Water', streak(d => d.water && waterTotal(d) >= 1500), '#D6E5FA', '#3F6FB8'], ['Protein', streak(d => d.meals && protein(d) >= S.settings.protein), '#E4ECB4', '#5E7A1E'], ['Stretch', streak(d => d.routines && (d.routines.morning || d.routines.after || d.routines.evening)), '#F8D3E1', '#B8436F']].map(([n, v, bg, c]) => `<div style="background:${bg};border-radius:22px;padding:14px 6px;display:flex;flex-direction:column;align-items:center;gap:4px;text-align:center">${ring(56, 22, 7, [{pct:Math.min(1, v / 7), color:c, track:'#fff'}], `<b>${v}</b>`)}<b style="font-size:13px">${n}</b><span class="small" style="font-size:11px">day streak</span></div>`).join('')}
+  </section>
+  </div>`;
+}
+function measSheet() {
+  openSheet(`<div class="between"><h2 style="font-size:20px">Log a measurement</h2><button class="round" style="width:44px;height:44px;background:#ECEAE3" data-act="closeSheet" aria-label="Close"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#26262B" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+  <label class="f">Front split: hip to floor, best side (cm)<input type="number" inputmode="decimal" id="mSplit" placeholder="e.g. 38"></label>
+  <label class="f">Toe-touch: fingertips to floor (cm, 0 = touching)<input type="number" inputmode="decimal" id="mToe" placeholder="e.g. 12"></label>
+  <button class="btn" data-act="measSave">Save</button>`);
+}
+
+/* ---------- SETTINGS ---------- */
+function renderSettings() {
+  const st = S.settings, t = todayStr();
+  const rows = [
+    ['kcal', 'Calories', '+200 in your premenstrual week', st.kcal.toLocaleString('en-US') + ' kcal', '#C9822F'],
+    ['protein', 'Protein', 'The most important number', st.protein + ' g', '#9DB53A'],
+    ['water', 'Water', st.waterOverride ? 'Your own target' : 'Follows your plan', fmtL(waterGoal(t)), '#4F7FCC'],
+    ['steps', 'Steps', st.stepsOverride ? 'Your own target' : 'Follows your plan', stepsGoal(t).toLocaleString('en-US'), '#7FA6E0'],
+    ['bed', 'Lights out', st.bedOverride ? 'Your own time' : 'Moves earlier as weeks pass', bedTime(t), '#5B4BA6'],
+    ['glass', 'Glass size', 'One tap on Today', st.glass + ' ml', '#7FA6E0'],
+    ['bottle', 'Bottle size', 'The + button on Today', st.bottle + ' ml', '#3F6FB8']
+  ];
+  const prefs = [['cycle', 'Show cycle phase', 'Pink cycle chip and calendar outlines'], ['pms', 'Hold-steady premenstrual week', 'Raise calories and lighten workouts automatically'], ['minimum', 'Minimum versions count as wins', '2-min stretch or a short session = full credit'], ['weight', 'Track weight', 'Shown as a weekly average']];
+  app.innerHTML = `<div class="stack">
+  <header><p class="sub">Your plan, your data</p><h1>Settings</h1></header>
+  <section class="card" style="gap:0"><h2 style="margin-bottom:8px">Daily targets</h2>
+  ${rows.map(r => `<div class="row" style="min-height:62px;border-top:1px solid #F1EFE9"><i style="width:12px;height:12px;border-radius:9px;background:${r[4]};flex:none"></i><span style="flex:1;display:flex;flex-direction:column"><span class="t15">${r[1]}</span><span class="small" style="font-weight:500">${r[2]}</span></span><button class="round" style="width:40px;height:40px;border:1.5px solid #E2DFD7;background:#fff" data-act="step" data-arg="${r[0]}|-1" aria-label="Decrease ${r[1]}">−</button><b style="min-width:74px;text-align:center;font-size:14px">${r[3]}</b><button class="round" style="width:40px;height:40px;border:1.5px solid #E2DFD7;background:#fff" data-act="step" data-arg="${r[0]}|1" aria-label="Increase ${r[1]}">+</button></div>`).join('')}
+  ${st.waterOverride || st.stepsOverride || st.bedOverride ? `<button class="pill" style="margin-top:8px" data-act="resetTargets">Back to the plan's targets</button>` : ''}
+  </section>
+  <section class="tile" style="background:var(--green)"><div class="between"><span class="chip">Goals &amp; dates</span><button class="pill" style="min-height:40px;border:none" data-act="goalsSheet">Edit</button></div>
+  <div class="grid2" style="gap:8px">${[['Plan start', G().start ? short(G().start) : 'Not set'], ['Weight goal', G().weight1 ? G().weight1 + ' kg' + (G().date1 ? ' · ' + short(G().date1) : '') : 'Not set'], ['Front split', G().split ? short(G().split) : 'Not set'], [G().tripName || 'Trip', G().trip ? short(G().trip) : 'Not set']].map(([a, b]) => `<div style="background:#fff;border-radius:16px;padding:10px 12px"><span class="small" style="color:#4A5226">${esc(a)}</span><div style="font-weight:800">${esc(b)}</div></div>`).join('')}</div></section>
+  <section class="tile" style="background:var(--lav)"><div class="between"><span class="chip">Gym days</span><span class="small" style="color:#463E66">${st.gym.length} days a week</span></div>
+  <div style="display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px">${['Mo','Tu','We','Th','Fr','Sa','Su'].map(k => `<button aria-pressed="${st.gym.includes(k)}" style="min-height:48px;border-radius:14px;border:none;font-weight:800;font-size:13px;background:${st.gym.includes(k) ? '#5B4BA6' : '#fff'};color:${st.gym.includes(k) ? '#fff' : '#26262B'}" data-act="gym" data-arg="${k}">${k}</button>`).join('')}</div>
+  <p class="small" style="color:#463E66">Sessions rotate Lower A, Upper A, Lower B, Upper B. Weeks 1–2 use your first 3 days.</p></section>
+  <section class="card" style="gap:0"><h2 style="margin-bottom:8px">Preferences</h2>
+  ${prefs.map(([k, n, note]) => `<button role="switch" aria-checked="${!!st.prefs[k]}" class="listbtn" style="min-height:64px" data-act="pref" data-arg="${k}"><span style="flex:1;display:flex;flex-direction:column"><span class="t15">${n}</span><span class="small" style="font-weight:500">${note}</span></span><span style="width:52px;height:32px;border-radius:99px;background:${st.prefs[k] ? '#B8436F' : '#D9D6CE'};position:relative;flex:none"><i style="position:absolute;top:3px;left:${st.prefs[k] ? 23 : 3}px;width:26px;height:26px;border-radius:99px;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.2)"></i></span></button>`).join('')}
+  </section>
+  ${/claude\.ai|claudeusercontent/.test(location.host) ? '' : `<section class="tile" style="background:var(--green)"><span class="chip">Apple Health</span>
+  <p style="font-size:14px;font-weight:500">A Shortcut can send today's steps (and your period start, if Stardust saves it to Health) into the app with one tap.</p>
+  <ol class="small" style="margin:0;padding-left:20px;color:#26262B;font-weight:500;display:flex;flex-direction:column;gap:4px;font-size:13px">
+  <li>Shortcuts → <b>+</b> → add <b>Find Health Samples</b>: Type <b>Steps</b>, Start Date <b>is today</b>.</li>
+  <li>Add <b>Calculate Statistics</b> → <b>Sum</b> of the samples.</li>
+  <li>Add <b>URL</b>: <span style="word-break:break-all">${esc(location.origin + location.pathname)}?steps=</span> then insert the <b>Statistics</b> result.</li>
+  <li>Add <b>Open URLs</b>. Name it "Sync steps" and add it to your home screen.</li>
+  <li>Optional: Automation → Time of Day 21:00 → Run Shortcut "Sync steps".</li></ol>
+  <p class="small" style="color:#4A5226">Period: add a second Find Health Samples (Menstrual Flow, latest first, limit 1) and append <b>&amp;period=</b> with its start date as yyyy-MM-dd.</p></section>`}
+  <section class="tile" style="background:var(--blue)"><span class="chip">Reminders</span>
+  <p class="small" style="color:#26262B;font-size:14px;font-weight:500">iPhone reminders work best through the Shortcuts app. Open <b>Shortcuts → Automation → New → Time of Day</b>, pick a time, choose <b>Show Notification</b>, and type the text. Suggested:</p>
+  <div style="background:#fff;border-radius:18px;padding:4px 14px">${[['Water', '08:30 · 11:00 · 15:00'], ['Pre-gym snack', '15:00'], ['Evening check-in', '22:00'], ['Wind-down', '45 min before ' + bedTime(t)], ['Back up your data', 'Sundays']].map(([a, b], i) => `<div class="between" style="min-height:44px;font-size:14px;font-weight:700;${i ? 'border-top:1px solid #F1EFE9' : ''}"><span>${a}</span><span style="color:#3E4A5C">${b}</span></div>`).join('')}</div></section>
+  <section class="card"><h2>Your data</h2>
+  <p class="small" style="font-weight:500;font-size:14px">${SYNC.on ? 'Saved on this device and synced privately to your Claude account, so it follows you across devices.' : 'Saved on this device. Back up regularly so you never lose it.'} <span id="syncState">${SYNC.state}</span></p>
+  <div class="grid2" style="gap:8px"><button class="btn small" data-act="backup">Download backup</button><button class="btn small ghost" data-act="copyBackup">Copy backup</button><label class="btn small ghost" style="display:flex;align-items:center;justify-content:center">Restore backup<input type="file" accept="application/json,.json" data-field="restore" class="sr"></label><button class="btn small ghost" data-act="csv">Download CSV</button></div>
+  <p class="small">Last backup: ${S.lastBackup ? nice(S.lastBackup) : 'never'}.</p>
+  <button style="align-self:flex-start;min-height:44px;background:none;border:none;padding:0;font-size:14px;font-weight:700;color:#9B2C55;text-decoration:underline" data-act="deleteAsk">Delete all data</button></section>
+  <section style="padding:0 6px" class="stack small" aria-label="Credits">
+  <p style="font-weight:500">Exercise animations: <a href="https://bryllim.github.io/workout-guide/">Workout Guide</a> by Bryl Lim, based on Everkinetic, CC BY-SA 4.0.</p>
+  <p style="font-weight:500">Body map: <a href="https://github.com/melihcolpan/MuscleMap">MuscleMap</a> by Melih Colpan, MIT licence.</p>
+  <p style="font-weight:500">General guidance, not medical advice. Check in with your GP or physio if pain gets worse.</p></section>
+  </div>`;
+}
+
+function goalsSheet(first) {
+  const g = G(), st = S.settings;
+  const f = (id, label, type, val, ph, extra) => `<label class="f">${label}<input id="${id}" type="${type}" ${type === 'number' ? 'inputmode="decimal" step="0.1"' : ''} value="${esc(val == null ? '' : val)}" placeholder="${ph || ''}" ${extra || ''}></label>`;
+  openSheet(`<div class="between"><h2 style="font-size:20px">${first ? 'Set up your plan' : 'Goals & dates'}</h2>${first ? '' : `<button class="round" style="width:44px;height:44px;background:#ECEAE3" data-act="closeSheet" aria-label="Close"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#26262B" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>`}</div>
+  ${first ? '<p class="small" style="font-weight:500;font-size:14px">These stay on your device and set your weeks, targets and goal timeline. You can change them any time in Settings.</p>' : ''}
+  ${f('gStart', 'Plan start date (Week 1, Day 1)', 'date', g.start || todayStr())}
+  <div class="grid2">${f('gKcal', 'Calories per day', 'number', st.kcal, '')}${f('gProt', 'Protein per day (g)', 'number', st.protein, '')}</div>
+  ${f('gW0', 'Start weight (kg, optional)', 'number', g.weight0 || st.startWeight, '')}
+  <div class="grid2">${f('gW1', 'First goal weight (kg)', 'number', g.weight1, '')}${f('gD1', 'By', 'date', g.date1)}</div>
+  <div class="grid2">${f('gW2', 'Longer-term weight (kg)', 'number', g.weight2, '')}${f('gD2', 'By', 'date', g.date2)}</div>
+  ${f('gSplit', 'Front split goal date (optional)', 'date', g.split)}
+  <div class="grid2">${f('gTripName', 'Trip or event (optional)', 'text', g.tripName, 'e.g. Ski trip', 'maxlength="24"')}${f('gTrip', 'Date', 'date', g.trip)}</div>
+  <p class="small" style="font-weight:500">The week before a trip becomes a lighter training week.</p>
+  <button class="btn" data-act="goalsSave">Save</button>`);
+}
+
+/* ---------- render + nav ---------- */
+function renderTabs() {
+  document.getElementById('tabs').innerHTML = [['today', 'Today'], ['workout', 'Workout'], ['routines', 'Routines'], ['progress', 'Progress'], ['more', 'Settings']].map(([k, l]) => `<button class="${tab === k ? 'on' : ''}" data-act="tab" data-arg="${k}" aria-current="${tab === k ? 'page' : 'false'}">${ICONS[k]}<span>${l}</span></button>`).join('');
+}
+function render() {
+  try {
+    if (tab === 'today') renderToday(); else if (tab === 'workout') renderWorkout(); else if (tab === 'routines') renderRoutines(); else if (tab === 'progress') renderProgress(); else renderSettings();
+  } catch (e) { app.innerHTML = `<div class="card"><h2>Something went wrong</h2><p class="small">${esc(e.message)}</p><button class="btn" data-act="tab" data-arg="today">Back to Today</button></div>`; console.error(e); }
+  renderTabs();
+  if (!S.settings.goals && !goalsSheet.shown && tab === 'today') { goalsSheet.shown = true; goalsSheet(true); }
+}
+
+/* ---------- actions ---------- */
+const now = () => { const d = new Date(); return pad(d.getHours()) + ':' + pad(d.getMinutes()); };
+const ACT = {
+  tab: a => { tab = a; if (a !== 'workout') pickedSession = null; window.scrollTo(0, 0); render(); },
+  shiftDay: a => { const n = addDays(viewDate, Number(a)); if (n <= todayStr()) { viewDate = n; render(); } },
+  water: a => { const d = day(viewDate); d.water.push({ml:Number(a), t:viewDate === todayStr() ? now() : '12:00'}); saveDay(viewDate); const wt = waterTotal(d), g = waterGoal(viewDate); if (wt >= g && wt - Number(a) < g) toast('Water goal reached! 💧'); render(); },
+  waterUndo: () => { const d = day(viewDate); d.water.pop(); saveDay(viewDate); render(); },
+  mealSheet: a => mealSheet(a),
+  mealStatus: a => { const [id, st] = a.split('|'), d = day(viewDate), m = MEALS.find(x => x.id === id); const v = d.meals[id] || {protein:m.protein}; v.status = v.status === st ? null : st; if (!v.status) delete d.meals[id]; else d.meals[id] = v; saveDay(viewDate); mealSheet(id); render(); },
+  mealProt: a => { const [id, n] = a.split('|'), d = day(viewDate), m = MEALS.find(x => x.id === id); const v = d.meals[id] || {protein:m.protein, status:'on'}; v.protein = Math.max(0, (v.protein || 0) + Number(n)); d.meals[id] = v; saveDay(viewDate); mealSheet(id); render(); },
+  toggleRoutine: a => { const d = day(viewDate); d.routines[a] = !d.routines[a]; saveDay(viewDate); render(); },
+  habit: a => { const d = day(viewDate); d.habits[a] = !d.habits[a]; saveDay(viewDate); render(); },
+  amSheet: () => amSheet(), pmSheet: () => pmSheet(), stepsSheet: () => stepsSheet(), cycleSheet: () => cycleSheet(), measSheet: () => measSheet(),
+  amSet: a => { const [f, v] = a.split('|'); day(viewDate).am[f] = Number(v); saveDay(viewDate); amSheet(); },
+  pmSet: a => { const [f, v] = a.split('|'); day(viewDate).pm[f] = f === 'mood' ? v : Number(v); saveDay(viewDate); pmSheet(); },
+  amDone: () => { day(viewDate).am.done = true; saveDay(viewDate); closeSheet(); render(); toast('Morning check-in saved'); },
+  pmDone: () => { day(viewDate).pm.done = true; saveDay(viewDate); closeSheet(); render(); toast('Evening check-in saved. Sleep well.'); },
+  closeSheet: () => closeSheet(), closeSheetRender: () => { closeSheet(); render(); },
+  closeSheetBg: (a, ev) => { if (ev.target.classList.contains('sheetbg')) { closeSheet(); render(); } },
+  periodStart: () => { S.cycle.starts = (S.cycle.starts || []).filter(x => x !== viewDate).concat([viewDate]); saveMeta(); closeSheet(); render(); toast('Period logged. Be kind to yourself this week.'); },
+  periodPick: () => { const v = PENDING.periodDate; if (!v) { toast('Pick a date first'); return; } S.cycle.starts = (S.cycle.starts || []).filter(x => x !== v).concat([v]); saveMeta(); closeSheet(); render(); toast('Saved'); },
+  periodUndo: () => { const s = (S.cycle.starts || []).slice().sort(); s.pop(); S.cycle.starts = s; saveMeta(); cycleSheet(); render(); },
+  pickSession: a => { pickedSession = a; render(); },
+  sessionMenu: () => openSheet(`<h2 style="font-size:20px">Switch session</h2>${SESSION_ORDER.map(c => `<button class="listbtn" data-act="pickSessionClose" data-arg="${c}"><span class="round" style="width:40px;height:40px;background:var(--lav);font-weight:800">${c}</span><span class="t15">${SESSIONS[c].name}</span></button>`).join('')}<button class="btn ghost" data-act="closeSheet">Cancel</button>`),
+  pickSessionClose: a => { pickedSession = a; closeSheet(); render(); },
+  tutorial: a => { const [c, id] = a.split('|'); tutorialSheet(c, id); },
+  toggleOpen: a => { const [id, v] = a.split('|'); const s = viewDate, w = wkState(s, pickedSession || sessionFor(s) || 'LA'); w.open[id] = v === '1'; saveDay(s); render(); },
+  setDone: a => { const s = viewDate, w = wkState(s, pickedSession || sessionFor(s) || 'LA'); const v = w.sets[a] || {}; const inp = document.querySelectorAll(`[data-field^="set|${a}|"]`); inp.forEach(i => { const f = i.dataset.field.split('|')[2]; if (i.value !== '') v[f] = Number(i.value); }); v.done = !v.done; w.sets[a] = v; saveDay(s); const y = window.scrollY; render(); window.scrollTo(0, y); },
+  wkToggle: a => { const [g, k] = a.split('|'); const s = viewDate, w = wkState(s, pickedSession || sessionFor(s) || 'LA'); w[g][k] = !w[g][k]; saveDay(s); const y = window.scrollY; render(); window.scrollTo(0, y); },
+  wkFlag: a => { const s = viewDate, w = wkState(s, pickedSession || sessionFor(s) || 'LA'); w[a] = !w[a]; saveDay(s); const y = window.scrollY; render(); window.scrollTo(0, y); },
+  walk: a => { const s = viewDate, w = wkState(s, pickedSession || sessionFor(s) || 'LA'); w.walkMin = Math.max(0, Math.min(90, (w.walkMin || 0) + Number(a))); saveDay(s); const y = window.scrollY; render(); window.scrollTo(0, y); },
+  finish: () => { const s = viewDate, w = wkState(s, pickedSession || sessionFor(s) || 'LA'); w.finished = true; saveDay(s); toast('Workout saved. Proud of you.'); tab = 'today'; pickedSession = null; render(); window.scrollTo(0, 0); },
+  rTab: a => { R.tab = a; R.playing = false; rGo(0); render(); },
+  rPlay: () => { R.playing = !R.playing; render(); },
+  rPrev: () => { rGo(R.idx - 1); render(); },
+  rNext: () => rFinishMove(),
+  rJump: a => { rGo(Number(a)); render(); },
+  rToggle: a => { const k = R.tab + ':' + a; R.done[k] = !R.done[k]; render(); },
+  rComplete: () => { completeRoutine(); render(); },
+  measSave: () => { const sp = document.getElementById('mSplit').value, to = document.getElementById('mToe').value; const e = {date:todayStr()}; if (sp !== '') e.split = Number(sp); if (to !== '') e.toe = Number(to); if (e.split != null || e.toe != null) S.meas.push(e); saveMeta(); closeSheet(); render(); toast('Saved'); },
+  step: a => { const [k, dir] = a.split('|'), n = Number(dir), st = S.settings, t = todayStr();
+    if (k === 'kcal') st.kcal = Math.max(1400, Math.min(2600, st.kcal + 50 * n));
+    if (k === 'protein') st.protein = Math.max(60, Math.min(180, st.protein + 5 * n));
+    if (k === 'water') st.waterOverride = Math.max(500, Math.min(4000, waterGoal(t) + 250 * n));
+    if (k === 'steps') st.stepsOverride = Math.max(2000, Math.min(20000, stepsGoal(t) + 500 * n));
+    if (k === 'bed') { const [h, m] = bedTime(t).split(':').map(Number); let mins = (h < 12 ? h + 24 : h) * 60 + m + 15 * n; mins = Math.max(21 * 60 + 30, Math.min(26 * 60, mins)); st.bedOverride = pad(Math.floor(mins / 60) % 24) + ':' + pad(mins % 60); }
+    if (k === 'glass') st.glass = Math.max(100, Math.min(600, st.glass + 50 * n));
+    if (k === 'bottle') st.bottle = Math.max(250, Math.min(1500, st.bottle + 50 * n));
+    saveMeta(); render(); },
+  goalsSheet: () => goalsSheet(false),
+  goalsSave: () => { const v = id => { const e = document.getElementById(id); return e && e.value !== '' ? e.value : null; }; const num = id => v(id) == null ? null : Number(String(v(id)).replace(',', '.'));
+    S.settings.goals = {start: v('gStart') || todayStr(), weight0: num('gW0'), weight1: num('gW1'), date1: v('gD1'), weight2: num('gW2'), date2: v('gD2'), split: v('gSplit'), trip: v('gTrip'), tripName: v('gTripName')};
+    if (num('gKcal')) S.settings.kcal = Math.round(num('gKcal')); if (num('gProt')) S.settings.protein = Math.round(num('gProt'));
+    saveMeta(); closeSheet(); render(); toast('Plan saved'); },
+  resetTargets: () => { S.settings.waterOverride = S.settings.stepsOverride = S.settings.bedOverride = null; saveMeta(); render(); },
+  gym: a => { const g = S.settings.gym; S.settings.gym = g.includes(a) ? g.filter(x => x !== a) : g.concat([a]); saveMeta(); render(); },
+  pref: a => { S.settings.prefs[a] = !S.settings.prefs[a]; saveMeta(); render(); },
+  backup: () => exportFile('wellness-backup-' + todayStr() + '.json', JSON.stringify(S, null, 1), 'application/json'),
+  copyBackup: () => { try { navigator.clipboard.writeText(JSON.stringify(S)).then(() => { S.lastBackup = todayStr(); saveMeta(); toast('Backup copied. Paste it into a note to keep it.'); render(); }, () => toast('Copy was blocked here. Try Download backup.')); } catch (e) { toast('Copy was blocked here.'); } },
+  csv: () => exportFile('wellness-' + todayStr() + '.csv', toCSV(), 'text/csv'),
+  deleteAsk: () => openSheet(`<h2 style="font-size:20px">Delete all data?</h2><p>This removes every check-in, workout and setting from this device${SYNC.on ? ' and your synced copy' : ''}. It can't be undone. Download a backup first if you might want it back.</p><button class="btn" style="background:#9B2C55" data-act="deleteYes">Yes, delete everything</button><button class="btn ghost" data-act="closeSheet">Keep my data</button>`),
+  deleteYes: async () => { const keys = Object.keys(S.days).map(k => 'd-' + k).concat(['meta']); S = freshState(); persistLocal(); closeSheet(); render(); if (SYNC.col) { for (const k of keys) { try { await SYNC.col.doc(k).delete(); } catch (e) {} } } toast('All data deleted'); }
+};
+const PENDING = {};
+document.addEventListener('click', ev => { const el = ev.target.closest('[data-act]'); if (!el) return; const fn = ACT[el.dataset.act]; if (fn) { if (el.dataset.act !== 'closeSheetBg') ev.preventDefault(); fn(el.dataset.arg, ev); } });
+document.addEventListener('change', ev => {
+  const f = ev.target.dataset && ev.target.dataset.field; if (!f) return;
+  const v = ev.target.value;
+  if (f === 'restore') { const file = ev.target.files[0]; if (!file) return; file.text().then(txt => { try { const s = JSON.parse(txt); if (!s.days || !s.settings) throw new Error('Not a backup file'); S = Object.assign(freshState(), s); Object.keys(S.days).forEach(k => dirty.add('d-' + k)); dirty.add('meta'); const t = Date.now(); Object.keys(S.days).forEach(k => S.updated['d-' + k] = t); S.updated.meta = t; persistLocal(); scheduleSync(); render(); toast('Backup restored'); } catch (e) { toast('That file is not a valid backup.'); } }); return; }
+  if (f === 'periodDate') { PENDING.periodDate = v; return; }
+  if (f === 'steps') { day(viewDate).steps = Number(v) || 0; saveDay(viewDate); return; }
+  if (f.startsWith('am.') || f.startsWith('pm.')) { const [g, k] = f.split('.'); day(viewDate)[g][k] = k === 'note' ? v : (v === '' ? null : Number(v)); saveDay(viewDate); return; }
+  if (f.startsWith('set|')) { const [, key, fld] = f.split('|'); const s = viewDate, w = wkState(s, pickedSession || sessionFor(s) || 'LA'); const r = w.sets[key] || {}; r[fld] = v === '' ? null : Number(v); w.sets[key] = r; saveDay(s); }
+});
+document.addEventListener('keydown', ev => { if (ev.key === 'Escape' && document.getElementById('sheet').innerHTML) { closeSheet(); render(); } });
+
+/* ---------- export ---------- */
+async function exportFile(name, data, type) {
+  try {
+    if (window.claude && claude.use) { const dl = await claude.use('downloads'); if (dl) { await dl.save({filename:name, data}); S.lastBackup = todayStr(); saveMeta(); toast('Saved ' + name); render(); return; } }
+  } catch (e) { toast('Download was cancelled.'); return; }
+  try { const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([data], {type})); a.download = name; document.body.appendChild(a); a.click(); a.remove(); S.lastBackup = todayStr(); saveMeta(); render(); } catch (e) { toast('Downloads are blocked here. Use Copy backup.'); }
+}
+function toCSV() {
+  const head = ['date','week','cycle_day','water_ml','protein_g','meals_on_plan','meals_off_plan','steps','sleep_h','sleep_q','weight','energy','mood','stress','cravings','workout','sets_done','walk_min','stretch_morning','stretch_after','stretch_evening','lights_out_on_time','score_pct'];
+  const lines = [head.join(',')];
+  Object.keys(S.days).sort().forEach(k => { const d = day(k); lines.push([k, weekOf(k), cycleDay(k) || '', waterTotal(d), protein(d), MEALS.filter(m => d.meals[m.id] && d.meals[m.id].status === 'on').length, MEALS.filter(m => d.meals[m.id] && d.meals[m.id].status === 'off').length, d.steps || '', d.am.sleepH || '', d.am.sleepQ || '', d.am.weight || '', d.pm.energy || '', d.pm.mood || '', d.pm.stress || '', d.pm.cravings || '', d.workout ? d.workout.session : '', workoutSets(d), d.workout && d.workout.walkDone ? d.workout.walkMin : '', d.routines.morning ? 1 : 0, d.routines.after ? 1 : 0, d.routines.evening ? 1 : 0, d.habits.windDown ? 1 : 0, Math.round(score(k).pct * 100)].join(',')); });
+  return lines.join('\n');
+}
+
+/* ---------- sync with Claude (private per-person store) ---------- */
+const SYNC = {on:false, col:null, state:'', busy:false, timer:null};
+function setSync(t) { SYNC.state = t; const el = document.getElementById('syncState'); if (el) el.textContent = t; }
+function scheduleSync() { if (!SYNC.col) return; clearTimeout(SYNC.timer); SYNC.timer = setTimeout(flush, 1500); }
+async function flush() {
+  if (!SYNC.col || SYNC.busy) return; SYNC.busy = true;
+  try {
+    while (dirty.size) {
+      const key = dirty.values().next().value; dirty.delete(key);
+      const body = key === 'meta' ? {settings:S.settings, cycle:S.cycle, meas:S.meas, lastBackup:S.lastBackup || null, updated:S.updated.meta || Date.now()} : {date:key.slice(2), data:S.days[key.slice(2)], updated:S.updated[key] || Date.now()};
+      try { await SYNC.col.doc(key).set(JSON.parse(JSON.stringify(body))); } catch (e) { if (e && e.code === 'unavailable') { dirty.add(key); await new Promise(r => setTimeout(r, 1500 + Math.random() * 1000)); } else if (e && e.code === 'quota_exceeded') { toast('Sync storage is full. Download a backup.'); } }
+    }
+    setSync('Synced ✓');
+  } finally { SYNC.busy = false; if (dirty.size) scheduleSync(); }
+}
+async function initSync() {
+  if (!(window.claude && typeof claude.use === 'function')) return;
+  try {
+    const [db, user] = await Promise.all([claude.use('db'), claude.use('user')]);
+    if (!db || !user) return;
+    const id = await user.id(); if (!id) return;
+    SYNC.col = db.collection('data/users/' + id); SYNC.on = true; setSync('Syncing…');
+    const snap = await SYNC.col.limit(1000).get();
+    let changed = false; const seen = new Set();
+    snap.docs.forEach(doc => {
+      const b = doc.data(); if (!b) return; seen.add(doc.id);
+      const localT = S.updated[doc.id] || 0, remoteT = b.updated || 0;
+      if (remoteT > localT) {
+        if (doc.id === 'meta') { if (b.settings) S.settings = Object.assign(JSON.parse(JSON.stringify(DEFAULT_SETTINGS)), b.settings); if (b.cycle) S.cycle = b.cycle; if (b.meas) S.meas = b.meas; S.lastBackup = b.lastBackup || S.lastBackup; }
+        else if (doc.id.startsWith('d-') && b.data) S.days[doc.id.slice(2)] = b.data;
+        S.updated[doc.id] = remoteT; changed = true;
+      } else if (localT > remoteT) dirty.add(doc.id);
+    });
+    Object.keys(S.updated).forEach(k => { if (!seen.has(k)) dirty.add(k); });
+    persistLocal(); if (changed) render(); setSync('Synced ✓'); scheduleSync();
+  } catch (e) { setSync('Saved on this device'); }
+}
+
+
+/* ---------- import from Apple Health via Shortcut (?steps=1234&period=YYYY-MM-DD&weight=88.4) ---------- */
+function importFromURL() {
+  try {
+    const q = new URLSearchParams(location.search); if (![...q.keys()].length) return;
+    const t = todayStr(); const got = [];
+    if (q.has('steps')) { const v = parseInt(q.get('steps'), 10); if (v >= 0 && v < 200000) { day(t).steps = v; saveDay(t); got.push(v.toLocaleString('en-US') + ' steps'); } }
+    if (q.has('period')) { const p = (q.get('period') || '').slice(0, 10); if (/^\d{4}-\d{2}-\d{2}$/.test(p) && p <= t && !(S.cycle.starts || []).includes(p)) { const prev = (S.cycle.starts || []).filter(x => Math.abs(diffDays(x, p)) < 15); if (!prev.length) { S.cycle.starts = (S.cycle.starts || []).concat([p]); saveMeta(); got.push('period start'); } } }
+    if (q.has('weight')) { const w = parseFloat(String(q.get('weight')).replace(',', '.')); if (w > 30 && w < 250) { day(t).am.weight = Math.round(w * 10) / 10; saveDay(t); got.push(w + ' kg'); } }
+    history.replaceState(null, '', location.pathname);
+    if (got.length) setTimeout(() => toast('From Health: ' + got.join(', ')), 300);
+  } catch (e) {}
+}
+
+/* ---------- boot ---------- */
+fetch('bodymap.json').then(r => r.json()).then(b => { BODY = b; if (tab === 'workout') { const y = window.scrollY; render(); window.scrollTo(0, y); } }).catch(() => {});
+document.addEventListener('visibilitychange', () => { if (!document.hidden && viewDate > todayStr()) viewDate = todayStr(); if (!document.hidden && tab === 'today') render(); });
+importFromURL();
+render();
+initSync();
+try { if ('serviceWorker' in navigator && location.protocol === 'https:' && window.top === window.self && !/claude\.ai|claudeusercontent/.test(location.host)) navigator.serviceWorker.register('sw.js').catch(() => {}); } catch (e) {}
+}
+</script>
+</body>
+</html>
