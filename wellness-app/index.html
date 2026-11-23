@@ -175,6 +175,29 @@ const SESSIONS = {
   ]}
 };
 const SESSION_ORDER = ['LA','UA','LB','UB'];
+/* extra swap options (no animation) */
+const EXTRA = [
+  ex('xlp','Leg press',null,3,'10\u201312',12,'kg',['quads','glutes','adductors'],['Feet hip-width in the middle of the platform.','Lower until your knees are about 90\u00b0.','Push through your whole foot.'],'Locking your knees at the top.',{step:5}),
+  ex('xlc','Seated leg curl',null,3,'10\u201312',12,'kg',['hamstrings'],['Pad just above your heels.','Curl down, squeeze, return slowly.'],'Lifting your hips off the seat.',{step:2.5}),
+  ex('xle','Leg extension',null,3,'10\u201312',12,'kg',['quads'],['Pad on your lower shins.','Straighten, pause, lower slowly.','Light weight if knees are sensitive.'],'Swinging the weight up.',{step:2.5}),
+  ex('xbss','Bulgarian split squat',null,3,'8\u201310 per leg',10,'kg',['quads','glutes','adductors'],['Back foot on a bench.','Drop the back knee straight down.','Front knee follows the toes.'],'Pushing off the back foot.',{step:1}),
+  ex('xlun','Walking lunge',null,3,'10 per leg',10,'kg',['quads','glutes'],['Long step, back knee towards the floor.','Upright chest.','Push through the front heel.'],'Front knee caving in.',{step:1}),
+  ex('xabd','Hip abduction machine',null,3,'12\u201315',15,'kg',['glutes'],['Sit tall, push knees out.','Pause, return slowly.'],'Bouncing the weight.',{step:2.5}),
+  ex('xkick','Cable glute kickback',null,3,'12 per leg',12,'kg',['glutes'],['Soft standing knee, slight lean.','Push the heel back and up.','Squeeze at the top.'],'Arching your lower back.',{step:1}),
+  ex('xbe','Back extension',null,3,'12',12,'kg',['lowerBack','glutes','hamstrings'],['Hips on the pad.','Lower with a flat back.','Rise until your body is straight.'],'Over-arching at the top.',{step:2.5}),
+  ex('xlpd','Lat pulldown',null,3,'10\u201312',12,'kg',['back','arms'],['Grip a little wider than shoulders.','Pull the bar to your upper chest.','Control it back up.'],'Leaning far back to yank it.',{step:2.5}),
+  ex('xscr','Seated cable row',null,3,'10\u201312',12,'kg',['back','arms'],['Sit tall, slight knee bend.','Pull to your belly, squeeze shoulder blades.','Arms long on the way back.'],'Rocking your torso.',{step:2.5}),
+  ex('xmcp','Machine chest press',null,3,'10\u201312',12,'kg',['chest','shoulders','arms'],['Handles at mid-chest.','Press out, don\'t lock elbows.','Slow on the way back.'],'Shoulders creeping up.',{step:2.5}),
+  ex('xdsp','Seated dumbbell shoulder press',null,3,'10\u201312',12,'kg',['shoulders','arms'],['Back supported, dumbbells at ear level.','Press up and slightly in.','Lower with control.'],'Arching your back off the bench.',{step:1}),
+  ex('xcurl','Dumbbell biceps curl',null,2,'12',12,'kg',['arms'],['Elbows by your sides.','Curl up, lower slowly.'],'Swinging your body.',{step:1}),
+  ex('xtri','Triceps rope pushdown',null,2,'12',12,'kg',['arms'],['Elbows pinned to your sides.','Push down and spread the rope.','Slow on the way up.'],'Elbows drifting forward.',{step:2.5}),
+  ex('xplk','Plank',null,3,'30 sec',30,'sec',['core'],['Elbows under shoulders.','Body in one line, squeeze glutes.'],'Hips sagging.'),
+  ex('xdb','Dead bug',null,3,'8 per side',8,'reps',['core'],['Lower back pressed into the floor.','Lower opposite arm and leg slowly.'],'Back lifting off the floor.'),
+  ex('xpal','Pallof press',null,2,'10 per side',10,'kg',['core'],['Stand side-on to the cable.','Press straight out, hold 2 sec.','Don\'t let it twist you.'],'Rotating towards the cable.',{step:1})
+];
+const MUSCLE_NAMES = {quads:'quads', hamstrings:'hamstrings', glutes:'glutes', adductors:'inner thighs', calves:'calves', core:'core', lowerBack:'lower back', back:'back', chest:'chest', shoulders:'shoulders', arms:'arms', forearms:'grip', traps:'traps'};
+function allExercises() { const seen = {}, out = []; SESSION_ORDER.forEach(c => SESSIONS[c].exercises.forEach(e => { if (!seen[e.id]) { seen[e.id] = 1; out.push(e); } })); return out.concat(EXTRA, (S.settings.customEx || []).map(c => ex(c.id, c.name, null, 3, c.reps || '10\u201312', null, c.unit || 'kg', c.muscles || [], [], '', {step:1}))); }
+function exById(id) { return allExercises().find(e => e.id === id); }
 const SPLIT = [
   {id:'hip', name:'Half-kneeling hip flexor', dose:'2 × 45 sec per side'},
   {id:'half', name:'Half-split, contract-relax', dose:'3 rounds per side'},
@@ -266,7 +289,15 @@ function bedTime(s) { if (S.settings.bedOverride) return S.settings.bedOverride;
 function kcalGoal(s) { const p = phase(cycleDay(s)); return S.settings.kcal + (S.settings.prefs.pms && p && p.key === 'pms' ? 200 : 0); }
 function walkGoal(s) { const w = weekOf(s); return [10,10,15,20,20,25,25,30][Math.min(w, 8) - 1]; }
 function wallGoal(s) { return Math.min(60, 30 + 10 * (weekOf(s) - 1)); }
-function exercisesFor(code, s) { const w = weekOf(s); return SESSIONS[code].exercises.filter(e => (!e.fromWeek || w >= e.fromWeek) && (!e.untilWeek || w <= e.untilWeek)); }
+function exercisesFor(code, s) {
+  const w = weekOf(s), d = S.days[s], ws = (d && d.workout && d.workout.session === code && d.workout.swaps) || {}, keep = S.settings.swaps || {};
+  return SESSIONS[code].exercises.filter(e => (!e.fromWeek || w >= e.fromWeek) && (!e.untilWeek || w <= e.untilWeek)).map(e => {
+    const to = ws[e.id] !== undefined ? ws[e.id] : keep[e.id];
+    if (!to || to === e.id) return e;
+    const r = exById(to); if (!r) return e;
+    return Object.assign({}, r, {orig:e.id, origName:e.name, sets:e.sets, optional:e.optional, fromWeek:null, untilWeek:null});
+  });
+}
 function setsFor(e, s) { return (lighterWeek(s) && e.sets > 2) ? 2 : e.sets; }
 function waterTotal(d) { return d.water.reduce((a, b) => a + b.ml, 0); }
 function waterBy(d, hhmm) { return d.water.filter(w => w.t <= hhmm).reduce((a, b) => a + b.ml, 0); }
@@ -521,8 +552,9 @@ function renderWorkout() {
       <div class="row" style="gap:8px">
         <button style="display:flex;align-items:center;gap:12px;flex:1;background:none;border:none;padding:0;text-align:left;min-height:44px" data-act="tutorial" data-arg="${code}|${e.id}">
           <span class="round" style="width:40px;height:40px;border-radius:14px;background:${all ? '#5B4BA6' : '#EDE8FB'};color:${all ? '#fff' : '#2F2752'};font-weight:800">${all ? '✓' : list.indexOf(e) + 1}</span>
-          <span style="display:flex;flex-direction:column;flex:1"><span style="font-size:16px;font-weight:800;display:flex;gap:6px;align-items:center">${esc(e.name)}<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#5B4BA6" stroke-width="2.2" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M10 8.5v7l5.5-3.5z" fill="#5B4BA6"/></svg></span><span class="small" style="font-weight:500">${target}${e.optional ? ' · optional' : ''}${cnt ? ' · ' + cnt + ' of ' + n : ''}</span></span>
+          <span style="display:flex;flex-direction:column;flex:1"><span style="font-size:16px;font-weight:800;display:flex;gap:6px;align-items:center">${esc(e.name)}<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#5B4BA6" stroke-width="2.2" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M10 8.5v7l5.5-3.5z" fill="#5B4BA6"/></svg></span><span class="small" style="font-weight:500">${e.orig ? 'Instead of ' + esc(e.origName) + ' · ' : ''}${target}${e.optional ? ' · optional' : ''}${cnt ? ' · ' + cnt + ' of ' + n : ''}</span></span>
         </button>
+        <button class="round" style="width:44px;height:44px;border:1.5px solid #E2DFD7;background:${e.orig ? '#EDE8FB' : '#fff'}" data-act="swapSheet" data-arg="${code}|${e.orig || e.id}" aria-label="Swap ${esc(e.name)}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#26262B" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 4L3 8l4 4M3 8h14M17 20l4-4-4-4M21 16H7"/></svg></button>
         <button class="round" style="width:44px;height:44px;border:1.5px solid #E2DFD7;background:#fff" data-act="toggleOpen" data-arg="${e.id}|${open ? 0 : 1}" aria-label="Show or hide sets"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#26262B" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="${open ? 'M6 15l6-6 6 6' : 'M6 9l6 6 6-6'}"/></svg></button>
       </div>
       ${open ? `<div class="stack" style="gap:8px"><div class="setgrid small"><span>Set</span><span>${e.unit === 'kg' ? 'kg' : ''}</span><span>${e.unit === 'sec' ? 'Sec' : e.unit === 'min' ? 'Min' : 'Reps'}</span><span></span></div>${rows.join('')}
@@ -557,13 +589,35 @@ function renderWorkout() {
   <p class="small" style="text-align:center;font-weight:500">Animations: <a href="https://bryllim.github.io/workout-guide/">Workout Guide</a> by Bryl Lim (Everkinetic, CC BY-SA 4.0). Body map: <a href="https://github.com/melihcolpan/MuscleMap">MuscleMap</a> by Melih Colpan (MIT).</p>
   </div>`;
 }
+let swapKeep = false;
+function swapSheet(code, origId) {
+  const s = viewDate, orig = exById(origId), list = exercisesFor(code, s), cur = list.find(e => (e.orig || e.id) === origId) || orig;
+  const taken = list.map(e => e.id);
+  const score = e => e.muscles.filter(m => orig.muscles.includes(m)).length;
+  const opts = allExercises().filter(e => !taken.includes(e.id) && e.id !== origId && score(e) > 0 && !e.wall).filter((e, i, arr) => arr.findIndex(x => x.name === e.name) === i).sort((a, b) => score(b) - score(a) || a.name.localeCompare(b.name));
+  const row = (e, label) => `<button class="listbtn" data-act="swapTo" data-arg="${code}|${origId}|${e.id}"><span style="flex:1;display:flex;flex-direction:column"><span class="t15">${esc(e.name)}</span><span class="small" style="font-weight:500">${label || e.muscles.map(m => MUSCLE_NAMES[m] || m).join(', ') + ' \u00b7 ' + esc(e.reps)}</span></span>${e.slug ? '<span class="small" style="color:#5B4BA6">demo</span>' : ''}</button>`;
+  openSheet(`<div class="between"><div><p class="small" style="color:#463E66">Swap exercise</p><h2 style="font-size:20px">${esc(cur.name)}</h2></div><button class="round" style="width:44px;height:44px;background:#ECEAE3" data-act="closeSheet" aria-label="Close"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#26262B" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+  <button role="switch" aria-checked="${swapKeep}" class="listbtn" style="border:none;min-height:52px" data-act="swapKeep" data-arg="${code}|${origId}"><span style="flex:1;display:flex;flex-direction:column"><span class="t15">Keep for future ${SESSIONS[code].name} workouts</span><span class="small" style="font-weight:500">Off = just today</span></span><span style="width:52px;height:32px;border-radius:99px;background:${swapKeep ? '#5B4BA6' : '#D9D6CE'};position:relative;flex:none"><i style="position:absolute;top:3px;left:${swapKeep ? 23 : 3}px;width:26px;height:26px;border-radius:99px;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.2)"></i></span></button>
+  ${cur.id !== origId ? `<div class="card" style="gap:0;padding:4px 14px">${row(orig, 'Back to the original')}</div>` : ''}
+  <div class="card" style="gap:0;padding:4px 14px"><p class="small" style="padding-top:10px">Works similar muscles</p>${opts.map(e => row(e)).join('')}</div>
+  <div class="card"><p class="t15">Something else?</p>
+  <div class="addrow"><input id="swName" placeholder="e.g. Smith machine squat" autocomplete="off"><select id="swUnit" style="min-height:44px;border-radius:14px;border:1.5px solid #E2DFD7;background:#fff;font-weight:600;padding:0 6px"><option value="kg">kg + reps</option><option value="reps">reps only</option><option value="sec">seconds</option></select><button class="pill" data-act="swapCustom" data-arg="${code}|${origId}">Use</button></div>
+  <p class="small" style="font-weight:500">Saved so you can pick it again. It counts for the same muscles as ${esc(orig.name)}.</p></div>`);
+}
+function applySwap(code, origId, toId) {
+  const s = viewDate, w = wkState(s, code); w.swaps = w.swaps || {};
+  w.swaps[origId] = toId;
+  if (swapKeep) { S.settings.swaps = S.settings.swaps || {}; if (toId === origId) delete S.settings.swaps[origId]; else S.settings.swaps[origId] = toId; saveMeta(); }
+  saveDay(s); closeSheet(); const y = window.scrollY; render(); window.scrollTo(0, y);
+  const e = exById(toId); toast(toId === origId ? 'Back to ' + e.name : 'Swapped to ' + e.name);
+}
 function tutorialSheet(code, id) {
-  const e = SESSIONS[code].exercises.find(x => x.id === id);
+  const e = exById(id);
   openSheet(`<div class="between"><div><p class="small" style="color:#463E66">How to do it</p><h2 style="font-size:22px">${esc(e.name)}</h2></div><button class="round" style="width:44px;height:44px;background:#ECEAE3" data-act="closeSheet" aria-label="Close"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#26262B" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
-  ${e.slug ? frames(e.slug, '#5B4BA6') : `<div class="anim" style="background:#5B4BA6;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;padding:24px;text-align:center">No animation for this one yet. Follow the steps below.</div>`}
+  ${e.slug ? frames(e.slug, '#5B4BA6') : `<div class="anim" style="background:#5B4BA6;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;padding:24px;text-align:center;height:120px">No animation for this one. Follow the steps below.</div>`}
   ${e.note ? `<p class="small" style="color:#463E66">${esc(e.note)}</p>` : ''}
-  <ol style="margin:0;padding-left:22px;display:flex;flex-direction:column;gap:8px">${e.cues.map(c => `<li>${esc(c)}</li>`).join('')}</ol>
-  <div style="background:var(--pink);border-radius:16px;padding:12px 14px"><b style="font-size:12px;color:#6E2443">Avoid</b><p style="font-size:14px;font-weight:600">${esc(e.avoid)}</p></div>
+  ${e.cues.length ? `<ol style="margin:0;padding-left:22px;display:flex;flex-direction:column;gap:8px">${e.cues.map(c => `<li>${esc(c)}</li>`).join('')}</ol>` : '<p class="small">Your own exercise. Log weight and reps as usual.</p>'}
+  ${e.avoid ? `<div style="background:var(--pink);border-radius:16px;padding:12px 14px"><b style="font-size:12px;color:#6E2443">Avoid</b><p style="font-size:14px;font-weight:600">${esc(e.avoid)}</p></div>` : ''}
   <button class="btn" data-act="closeSheet">Got it</button>`);
 }
 
@@ -683,7 +737,7 @@ function renderProgress() {
   // radial
   const groups = [['Legs', ['quads','hamstrings','calves','adductors'], '#5B4BA6'], ['Glutes', ['glutes'], '#7C6CC4'], ['Back', ['back','lowerBack','traps'], '#4F7FCC'], ['Chest', ['chest'], '#7FA6E0'], ['Shoulders & arms', ['shoulders','arms','forearms'], '#9DB53A'], ['Core', ['core'], '#B8436F']];
   const gv = groups.map(() => 0);
-  for (let i = 0; i < 7; i++) { const s = addDays(mon, i), d = S.days[s]; if (!d || !d.workout || !d.workout.sets) continue; const code = d.workout.session; Object.entries(d.workout.sets).forEach(([k, v]) => { if (!v.done) return; const e = SESSIONS[code] && SESSIONS[code].exercises.find(x => x.id === k.split(':')[0]); if (!e) return; groups.forEach((g, gi) => { if (e.muscles.some(m => g[1].includes(m))) gv[gi]++; }); }); }
+  for (let i = 0; i < 7; i++) { const s = addDays(mon, i), d = S.days[s]; if (!d || !d.workout || !d.workout.sets) continue; const code = d.workout.session; Object.entries(d.workout.sets).forEach(([k, v]) => { if (!v.done) return; const e = exById(k.split(':')[0]); if (!e) return; groups.forEach((g, gi) => { if (e.muscles.some(m => g[1].includes(m))) gv[gi]++; }); }); }
   const maxV = Math.max(4, ...gv), cx = 160, cy = 140;
   const radial = `<svg viewBox="0 0 320 290" style="width:100%;height:auto" role="img" aria-label="Sets this week by muscle group: ${groups.map((g, i) => g[0] + ' ' + gv[i]).join(', ')}"><circle cx="${cx}" cy="${cy}" r="30" fill="#F6F4EF"/><circle cx="${cx}" cy="${cy}" r="108" fill="none" stroke="#F1EFE9"/>${groups.map((g, i) => { const a0 = (-90 + i * 60 + 3) * Math.PI / 180, a1 = (-90 + (i + 1) * 60 - 3) * Math.PI / 180, r0 = 32, r1 = r0 + Math.max(2, gv[i] / maxV * 76); const P = (r, a) => [(cx + r * Math.cos(a)).toFixed(1), (cy + r * Math.sin(a)).toFixed(1)]; const [x1, y1] = P(r0, a0), [x2, y2] = P(r1, a0), [x3, y3] = P(r1, a1), [x4, y4] = P(r0, a1), am = (a0 + a1) / 2, [lx, ly] = P(124, am); return `<path d="M${x1} ${y1}L${x2} ${y2}A${r1} ${r1} 0 0 1 ${x3} ${y3}L${x4} ${y4}A${r0} ${r0} 0 0 0 ${x1} ${y1}Z" fill="${g[2]}"/><text x="${lx}" y="${Number(ly) - 2}" font-size="12" font-weight="800" fill="#26262B" text-anchor="middle">${gv[i]} sets</text><text x="${lx}" y="${Number(ly) + 12}" font-size="11" font-weight="600" fill="#4E4E56" text-anchor="middle">${g[0]}</text>`; }).join('')}</svg>`;
   const daysToSplit = g.split ? diffDays(t, g.split) : null;
@@ -844,6 +898,10 @@ const ACT = {
     if (n == null) { toast('No steps found. Run the "Copy steps" Shortcut first.'); return; }
     day(viewDate).steps = n; saveDay(viewDate); closeSheet(); render(); toast(n.toLocaleString('en-US') + ' steps saved');
   },
+  swapSheet: a => { const [c, id] = a.split('|'); swapKeep = false; swapSheet(c, id); },
+  swapKeep: a => { const [c, id] = a.split('|'); swapKeep = !swapKeep; swapSheet(c, id); },
+  swapTo: a => { const [c, id, to] = a.split('|'); applySwap(c, id, to); },
+  swapCustom: a => { const [c, id] = a.split('|'); const n = (document.getElementById('swName').value || '').trim().replace(/[|]/g, ' ').slice(0, 40); if (!n) { toast('Type a name first'); return; } const unit = document.getElementById('swUnit').value; const list = S.settings.customEx = S.settings.customEx || []; let cx = list.find(x => x.name.toLowerCase() === n.toLowerCase()); if (!cx) { cx = {id:'x' + Date.now().toString(36), name:n, unit, reps: unit === 'sec' ? '30 sec' : '10\u201312', muscles: exById(id).muscles.slice()}; list.push(cx); } saveMeta(); applySwap(c, id, cx.id); },
   mealClear: a => { const d = day(viewDate); delete d.meals[a]; saveDay(viewDate); closeSheet(); render(); toast('Unchecked'); },
   foodAdd: a => { const [id, src, i] = a.split('|'); const f = src === 'b' ? {n:FOODS[i][0], p:FOODS[i][1]} : myFoods()[i]; if (!f) return; mealAddItem(id, f.n, f.p); mealSheet(id); render(); },
   foodQty: a => { const [id, i, n] = a.split('|'), d = day(viewDate), v = d.meals[id]; if (!v || !v.items || !v.items[i]) return; const f = v.items[i], dq = Number(n); f.q += dq; v.protein = Math.max(0, (v.protein || 0) + dq * f.p); if (f.q <= 0) v.items.splice(i, 1); if (!v.items.length) v.protein = 0; saveDay(viewDate); mealSheet(id); render(); },
