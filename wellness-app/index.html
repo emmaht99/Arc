@@ -372,7 +372,8 @@ function renderToday() {
       <span style="font-size:22px;font-weight:800">${(d.steps || 0).toLocaleString('en-US')}</span>
       ${bar((d.steps || 0) / stepsGoal(s), '#C9822F', '#F2EEE6')}
       <span class="small">of ${stepsGoal(s).toLocaleString('en-US')}</span>
-      <button class="pill" style="min-height:40px" data-act="stepsSheet">Update</button>
+      <button class="pill" style="min-height:40px" data-act="pasteSteps">Paste from Health</button>
+      <button style="align-self:flex-start;background:none;border:none;padding:0;min-height:32px;font-size:12px;font-weight:700;text-decoration:underline;color:#5E5E66" data-act="stepsSheet">Type instead</button>
     </section>
     <section class="card" aria-label="Check-ins" style="gap:8px">
       <span class="small" style="font-size:13px">Check-ins</span>
@@ -456,8 +457,10 @@ function pmSheet() {
 function stepsSheet() {
   const d = day(viewDate);
   openSheet(`<div class="between"><h2 style="font-size:20px">Steps</h2><button class="round" style="width:44px;height:44px;background:#ECEAE3" data-act="closeSheet" aria-label="Close"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#26262B" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
-  <label class="f">Steps from your iPhone's Health app<input type="number" inputmode="numeric" data-field="steps" value="${esc(d.steps || '')}" placeholder="e.g. 6500"></label>
-  <button class="btn" data-act="closeSheetRender">Save</button>`);
+  <button class="btn" style="background:#C9822F" data-act="pasteSteps">Paste steps from Health</button>
+  <p class="small" style="font-weight:500">Run your "Copy steps" Shortcut first, then tap the button and choose Paste. Set it up once under Settings → Steps from Health.</p>
+  <label class="f">Or type them in<input type="number" inputmode="numeric" data-field="steps" value="${esc(d.steps || '')}" placeholder="e.g. 6500"></label>
+  <button class="btn ghost" data-act="closeSheetRender">Save</button>`);
 }
 function cycleSheet() {
   const cd = cycleDay(viewDate), starts = (S.cycle.starts || []).slice().sort().reverse().slice(0, 4);
@@ -770,15 +773,18 @@ function renderSettings() {
   <section class="card" style="gap:0"><h2 style="margin-bottom:8px">Preferences</h2>
   ${prefs.map(([k, n, note]) => `<button role="switch" aria-checked="${!!st.prefs[k]}" class="listbtn" style="min-height:64px" data-act="pref" data-arg="${k}"><span style="flex:1;display:flex;flex-direction:column"><span class="t15">${n}</span><span class="small" style="font-weight:500">${note}</span></span><span style="width:52px;height:32px;border-radius:99px;background:${st.prefs[k] ? '#B8436F' : '#D9D6CE'};position:relative;flex:none"><i style="position:absolute;top:3px;left:${st.prefs[k] ? 23 : 3}px;width:26px;height:26px;border-radius:99px;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.2)"></i></span></button>`).join('')}
   </section>
-  ${/claude\.ai|claudeusercontent/.test(location.host) ? '' : `<section class="tile" style="background:var(--green)"><span class="chip">Apple Health</span>
-  <p style="font-size:14px;font-weight:500">A Shortcut can send today's steps (and your period start, if Stardust saves it to Health) into the app with one tap.</p>
+  <section class="tile" style="background:var(--green)"><span class="chip">Steps from Health</span>
+  <p style="font-size:14px;font-weight:500">A Shortcut copies today's steps from Apple Health. Then tap <b>Paste from Health</b> on the Steps tile. Set it up once:</p>
   <ol class="small" style="margin:0;padding-left:20px;color:#26262B;font-weight:500;display:flex;flex-direction:column;gap:4px;font-size:13px">
-  <li>Shortcuts → <b>+</b> → add <b>Find Health Samples</b>: Type <b>Steps</b>, Start Date <b>is today</b>.</li>
-  <li>Add <b>Calculate Statistics</b> → <b>Sum</b> of the samples.</li>
-  <li>Add <b>URL</b>: <span style="word-break:break-all">${esc(location.origin + location.pathname)}?steps=</span> then insert the <b>Statistics</b> result.</li>
-  <li>Add <b>Open URLs</b>. Name it "Sync steps" and add it to your home screen.</li>
-  <li>Optional: Automation → Time of Day 21:00 → Run Shortcut "Sync steps".</li></ol>
-  <p class="small" style="color:#4A5226">Period: add a second Find Health Samples (Menstrual Flow, latest first, limit 1) and append <b>&amp;period=</b> with its start date as yyyy-MM-dd.</p></section>`}
+  <li>Open <b>Shortcuts</b> → <b>+</b>. Name it <b>Copy steps</b>.</li>
+  <li>Add <b>Find Health Samples</b>: Type <b>Steps</b>, filter <b>Start Date is today</b>.</li>
+  <li>Add <b>Calculate Statistics</b> → <b>Sum</b>.</li>
+  <li>Add <b>Round Number</b>, then <b>Copy to Clipboard</b>.</li>
+  <li>Optional: <b>Show Notification</b> "Steps copied".</li>
+  <li>Allow Health access the first time it runs. Add the shortcut to your home screen next to this app.</li></ol>
+  <p class="small" style="color:#4A5226">Each evening: tap Copy steps, open this app, tap Paste from Health, then Paste.</p></section>
+  <section class="tile" style="background:var(--pink)"><span class="chip">Period from Stardust</span>
+  <p class="small" style="color:#26262B;font-size:14px;font-weight:500">Stardust doesn't share periods with Apple Health, so log the start here: tap the pink <b>Cycle</b> chip on Today → <b>My period started today</b>. Forgot? Pick the date from Stardust in the same sheet.</p></section>
   <section class="tile" style="background:var(--blue)"><span class="chip">Reminders</span>
   <p class="small" style="color:#26262B;font-size:14px;font-weight:500">iPhone reminders work best through the Shortcuts app. Open <b>Shortcuts → Automation → New → Time of Day</b>, pick a time, choose <b>Show Notification</b>, and type the text. Suggested:</p>
   <div style="background:#fff;border-radius:18px;padding:4px 14px">${[['Water', '08:30 · 11:00 · 15:00'], ['Pre-gym snack', '15:00'], ['Evening check-in', '22:00'], ['Wind-down', '45 min before ' + bedTime(t)], ['Back up your data', 'Sundays']].map(([a, b], i) => `<div class="between" style="min-height:44px;font-size:14px;font-weight:700;${i ? 'border-top:1px solid #F1EFE9' : ''}"><span>${a}</span><span style="color:#3E4A5C">${b}</span></div>`).join('')}</div></section>
@@ -831,6 +837,13 @@ const ACT = {
   waterUndo: () => { const d = day(viewDate); d.water.pop(); saveDay(viewDate); render(); },
   mealSheet: a => { mealEdit = false; mealSheet(a); },
   mealStatus: a => { const [id, st] = a.split('|'), d = day(viewDate), m = MEALS.find(x => x.id === id); const v = d.meals[id] || {protein:m.protein}; v.status = v.status === st ? null : st; if (!v.status) delete d.meals[id]; else d.meals[id] = v; saveDay(viewDate); mealSheet(id); render(); },
+  pasteSteps: async () => {
+    let txt = '';
+    try { txt = await navigator.clipboard.readText(); } catch (e) { toast('Paste was blocked. Use Type instead.'); return; }
+    const n = parseSteps(txt);
+    if (n == null) { toast('No steps found. Run the "Copy steps" Shortcut first.'); return; }
+    day(viewDate).steps = n; saveDay(viewDate); closeSheet(); render(); toast(n.toLocaleString('en-US') + ' steps saved');
+  },
   mealClear: a => { const d = day(viewDate); delete d.meals[a]; saveDay(viewDate); closeSheet(); render(); toast('Unchecked'); },
   foodAdd: a => { const [id, src, i] = a.split('|'); const f = src === 'b' ? {n:FOODS[i][0], p:FOODS[i][1]} : myFoods()[i]; if (!f) return; mealAddItem(id, f.n, f.p); mealSheet(id); render(); },
   foodQty: a => { const [id, i, n] = a.split('|'), d = day(viewDate), v = d.meals[id]; if (!v || !v.items || !v.items[i]) return; const f = v.items[i], dq = Number(n); f.q += dq; v.protein = Math.max(0, (v.protein || 0) + dq * f.p); if (f.q <= 0) v.items.splice(i, 1); if (!v.items.length) v.protein = 0; saveDay(viewDate); mealSheet(id); render(); },
@@ -910,6 +923,13 @@ document.addEventListener('input', ev => {
   if (hit && pr && pr.value === '') pr.value = hit[1];
 });
 document.addEventListener('keydown', ev => { if (ev.key === 'Escape' && document.getElementById('sheet').innerHTML) { closeSheet(); render(); } });
+
+function parseSteps(t) {
+  t = String(t || '').replace(/[\s\u00a0\u202f']/g, '');
+  if (!/^\d[\d.,]*$/.test(t)) return null;
+  const n = /^\d{1,3}([.,]\d{3})+$/.test(t) ? Number(t.replace(/[.,]/g, '')) : Number(t.split(/[.,]/)[0]);
+  return n >= 0 && n < 200000 ? Math.round(n) : null;
+}
 
 /* ---------- export ---------- */
 async function exportFile(name, data, type) {
